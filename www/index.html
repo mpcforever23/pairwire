@@ -10,12 +10,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
-/* Layout: bottom tab bar with four sections; cards in one column on phones, two-up from 900px. Navy desk, teal accent. */
+/* Layout: bottom tab bar with four sections; cards in one column on phones, two-up from 900px. Midnight indigo ground, gold accent, indigo-to-violet hero. */
 :root {
   color-scheme: dark;
-  --bg: #0b0f17; --surface: #121826; --surface-2: #1a2233; --fg: #e6eaf2; --muted: #8a94a8;
-  --line: #263042; --brass: #2ec4b6; --brass-ink: #04211e; --gold: #e8c46a;
-  --hot: #f46060; --cool: #5fa3c8; --pos: #35c995; --neg: #f46060;
+  --bg: #090c16; --surface: #11162a; --surface-2: #1b2242; --fg: #eef0fa; --muted: #949bbd;
+  --line: #272f55; --brass: #f4b94a; --brass-ink: #1c1303; --gold: #ffd978;
+  --hot: #ff5d6c; --cool: #6aa8ff; --pos: #2fd08a; --neg: #ff5d6c;
+  --hero-a: #2a3a8f; --hero-b: #5b2d8e; --violet: #9b8cff;
   --f-display: "Space Grotesk", "Segoe UI", Roboto, system-ui, sans-serif;
   --f-sans: "Inter", "Segoe UI", Roboto, system-ui, sans-serif;
   --f-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -123,7 +124,19 @@ button.wire-row:hover { background: var(--surface-2); }
 body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 .appbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 .appbar .wrap { display: flex; align-items: center; gap: 10px; padding-block: 10px; }
-.logo { width: 30px; height: 30px; border-radius: 9px; background: var(--brass); color: var(--brass-ink); display: grid; place-items: center; flex: none; }
+.logo { width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(140deg, var(--hero-a), var(--hero-b)); color: var(--gold); display: grid; place-items: center; flex: none; }
+.menubtn { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; width: 38px; height: 38px; display: grid; place-items: center; color: var(--fg); flex: none; }
+.scrim { position: fixed; inset: 0; z-index: 40; background: color-mix(in srgb, var(--bg) 70%, transparent); }
+.menu { position: fixed; z-index: 41; top: calc(env(safe-area-inset-top, 0px) + 58px); right: max(12px, env(safe-area-inset-right, 0px)); width: min(320px, calc(100vw - 24px)); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 8px; box-shadow: 0 24px 50px -20px #000; max-height: calc(100vh - 140px); overflow: auto; }
+.menu .who { padding: 10px 12px 12px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+.menu .mi { display: flex; align-items: center; gap: 12px; width: 100%; background: none; border: 0; border-radius: 10px; padding: 11px 12px; text-align: left; font-size: 15px; }
+.menu .mi:hover, .menu .mi:focus-visible { background: var(--surface-2); }
+.menu .mi svg { width: 19px; height: 19px; color: var(--brass); flex: none; }
+.menu .mi.danger { color: var(--neg); } .menu .mi.danger svg { color: var(--neg); }
+.menu form { display: grid; gap: 8px; padding: 6px 12px 12px; }
+.menu input { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; }
+.symchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.symchips span { background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 12.5px; }
 .appbar .name { font-family: var(--f-display); font-weight: 700; font-size: 18px; letter-spacing: -.01em; }
 .appbar .sp { flex: 1; }
 .sync { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
@@ -140,14 +153,19 @@ body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 @media (min-width: 900px) { .sec.two { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } .sec.two .full { grid-column: 1 / -1; } }
 .newsbar { display: flex; flex-wrap: wrap; gap: 8px; padding-block: 14px 0; }
 .layout { padding-block: 14px 28px; }
-.hero { background: linear-gradient(145deg, color-mix(in srgb, var(--brass) 18%, var(--surface)), var(--surface) 60%); border: 1px solid color-mix(in srgb, var(--brass) 30%, var(--line)); border-radius: 18px; padding: 18px; display: grid; gap: 14px; }
+.hero { background: linear-gradient(140deg, var(--hero-a), var(--hero-b)); border: 1px solid color-mix(in srgb, var(--violet) 45%, transparent); border-radius: 20px; padding: 18px; display: grid; gap: 14px; box-shadow: 0 14px 34px -18px var(--hero-b); }
+.hero .eyebrow, .hero .note { color: color-mix(in srgb, var(--fg) 78%, transparent); }
+.hero .trio { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.hero .trio > div { background: color-mix(in srgb, var(--bg) 34%, transparent); border-radius: 12px; padding: 9px 12px; min-width: 0; }
+.hero .trio .v { font-family: var(--f-display); font-weight: 600; font-size: 19px; overflow-wrap: anywhere; }
+.hero .pos, .hero .up { color: #7df0bb; } .hero .neg, .hero .down { color: #ffb0b8; }
 .hero .acct { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
 .hero .big { font-family: var(--f-display); font-weight: 700; font-size: clamp(32px, 9vw, 44px); line-height: 1.05; letter-spacing: -.02em; }
 .hero .delta { font-weight: 600; font-size: 15px; }
 .pos { color: var(--pos); } .neg { color: var(--neg); }
 .tiles { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 620px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-width: 0; }
+.tile { background: linear-gradient(180deg, var(--surface-2), var(--surface)); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-width: 0; }
 .tile .v { font-family: var(--f-display); font-weight: 600; font-size: 22px; line-height: 1.15; margin-top: 4px; overflow-wrap: anywhere; }
 .tile .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
@@ -196,8 +214,9 @@ body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
   </head>
 <body>
 <header class="appbar"><div class="wrap">
-    <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 6-8"/><path d="M15 6h4v4"/></svg></span>
+    <span class="logo" aria-hidden="true"><svg viewBox="0 0 104 104" width="22" height="22" fill="currentColor" fill-rule="evenodd"><path d="M8 90 L15 72 L8 68 L19 56 L12 50 L25 39 C33 23 51 13 68 17 L80 22 C95 27 101 44 94 61 L88 52 C87 46 82 43 74 45 L67 53 C65 61 61 65 55 67 L59 75 L49 77 L53 87 L41 89 L43 97 L24 95 Z M55 31 L70 27 L65 35 Z"/></svg></span>
     <span class="name">EagleTracker</span><span class="sp"></span><span class="sync" id="sync"></span>
+    <button class="menubtn" id="btn-menu" aria-label="Menu" aria-haspopup="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div></header>
   <section id="sec-perf" class="wrap sec two" hidden></section>
   <section id="sec-news" hidden>
@@ -226,6 +245,8 @@ body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
     <button class="navbtn" data-sec="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.500-4 5-6 8-6s6.500 2 8 6"/></svg>Account</button>
   </div></nav>
 </div>
+<div class="scrim" id="scrim" hidden></div>
+<div class="menu" id="menu" hidden></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -700,6 +721,7 @@ function ago(ms) { const s = Math.max(0, Math.round((Date.now() - ms) / 1000)); 
 
 /* ---------- auth (Firebase REST) ---------- */
 const AUTH_ERR = {
+  CREDENTIAL_TOO_OLD_LOGIN_AGAIN: "For safety, sign out, sign in again, then change the password.", TOKEN_EXPIRED: "Your session expired. Sign out and sign in again.", WEAK_PASSWORD: "Use at least 6 characters.",
   EMAIL_EXISTS: "That email already has an account. Sign in instead.",
   EMAIL_NOT_FOUND: "Wrong email or password.", INVALID_PASSWORD: "Wrong email or password.", INVALID_LOGIN_CREDENTIALS: "Wrong email or password.",
   INVALID_EMAIL: "That email address does not look right.", MISSING_PASSWORD: "Type your password.",
@@ -739,7 +761,7 @@ async function submitAuth() {
 function renderAuth() {
   const up = A.mode === "up", reset = A.mode === "reset";
   $("auth").innerHTML = `<div class="auth">
-    <div class="row"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 6-8"/><path d="M15 6h4v4"/></svg></span><span style="font-family:var(--f-display);font-weight:700;font-size:20px">EagleTracker</span></div>
+    <div class="row"><span class="logo" aria-hidden="true"><svg viewBox="0 0 104 104" width="22" height="22" fill="currentColor" fill-rule="evenodd"><path d="M8 90 L15 72 L8 68 L19 56 L12 50 L25 39 C33 23 51 13 68 17 L80 22 C95 27 101 44 94 61 L88 52 C87 46 82 43 74 45 L67 53 C65 61 61 65 55 67 L59 75 L49 77 L53 87 L41 89 L43 97 L24 95 Z M55 31 L70 27 L65 35 Z"/></svg></span><span style="font-family:var(--f-display);font-weight:700;font-size:20px">EagleTracker</span></div>
     <div><h1>${up ? "Create your account" : reset ? "Reset your password" : "Welcome back"}</h1>
       <p class="muted" style="margin-top:6px">${up ? "Track every EA on your MT5 accounts, with daily results, news reads and reports." : reset ? "We will email you a link to choose a new password." : "Sign in to see how your EAs are doing."}</p></div>
     <form id="authform" novalidate>
@@ -765,7 +787,9 @@ async function loadAccounts() {
     if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? "The database refused the request. Sign out and in again." : "Could not load your accounts.");
     const j = (await r.json()) || {}, out = {};
     for (const d of j.documents || []) { try { const v = JSON.parse(d.fields.json.stringValue); out[String(v.login || d.name.split("/").pop())] = v; } catch (e) {} }
-    A.accounts = out; A.loadErr = "";
+    const sig = JSON.stringify(out);
+    if (sig === A.sig && A.accounts) { A.loadErr = ""; if (S.sec === "perf") renderSync(currentAcct()); return; }
+    A.sig = sig; A.accounts = out; A.loadErr = "";
   } catch (e) { A.loadErr = e.message || "Could not load your accounts. Check your internet."; if (!A.accounts) A.accounts = null; }
   if (A.user && S.sec !== "news" && S.sec !== "world") render();
 }
@@ -782,7 +806,7 @@ function sampleAccounts() {
   }
   return { "52001234": { login: 52001234, server: "Exness-MT5Real8", broker: "Exness Technologies Ltd", name: "Sample account", currency: "USD", leverage: 500, demo: false,
     balance: +bal.toFixed(2), equity: +(bal + 38.4).toFixed(2), margin: 121.5, floating: 38.4, updated: Math.floor(Date.now() / 1000) - 25, today: Object.keys(days).pop(),
-    charts: [{ name: "EagleVision Pro", sym: "XAUUSD", tf: "M5" }, { name: "FlipStop_HF_EA", sym: "XAUUSD", tf: "M1" }, { name: "KeyLevel_Scalper_EA", sym: "EURUSD", tf: "M15" }],
+    charts: [{ name: "EagleVision Pro", sym: "XAUUSD", tf: "H1" }], scan: ["XAUUSD", "BTCUSD", "Volatility 75 Index", "Volatility 10 Index", "Step Index", "EURUSD"], window: 90,
     eas: agg.map(e => ({ ...e, pl: +e.pl.toFixed(2) })), days,
     positions: [{ sym: "XAUUSD", side: "buy", vol: 0.1, open: 4008.35, pl: 26.1, ea: "EagleVision Pro" }, { sym: "XAUUSD", side: "buy", vol: 0.1, open: 4010.1, pl: 12.3, ea: "EagleVision Pro" }],
     deals: deals.slice(-40).reverse() } };
@@ -856,7 +880,7 @@ function renderPerf() {
   const cur = acc.currency || "", ids = Object.keys(A.accounts), sm = summary(acc, A.range);
   const td = (acc.days || {})[acc.today] || { pl: 0, pct: 0, n: 0, w: 0 };
   const eas = (acc.eas || []).slice().sort((a, b) => b.pl - a.pl), mxEa = Math.max(1, ...eas.map(e => Math.abs(e.pl)));
-  const charts = acc.charts || [], pos = acc.positions || [], deals = (acc.deals || []).slice(0, 15);
+  const charts = acc.charts || [], scan = acc.scan || [], pos = acc.positions || [], deals = (acc.deals || []).slice(0, 15);
   const dayRows = sm.ds.slice().reverse().slice(0, 31).map(x => `<tr><td class="num" style="white-space:nowrap">${esc(new Date(x.d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }))}</td><td class="r num">${x.n}</td><td class="r num">${x.n ? Math.round(x.w / x.n * 100) + "%" : "—"}</td><td class="r num ${pn(x.pl)}">${signed(x.pl)}</td><td class="r num ${pn(x.pct)}">${pc(x.pct || 0)}</td></tr>`).join("");
   el.innerHTML = `
   ${A.sample ? `<div class="card full row" style="justify-content:space-between"><span><span class="badge demo">Sample data</span> <span class="note">These numbers are examples, not a real account.</span></span><button class="linkbtn" id="btn-signout">Exit preview</button></div>` : ""}
@@ -867,9 +891,13 @@ function renderPerf() {
       <button class="btn" id="btn-pdf" ${A.pdfBusy ? "disabled" : ""}>${A.pdfBusy ? "Building…" : "Download PDF"}</button></div>
     <div><div class="eyebrow">Balance</div><div class="big num">${money(acc.balance || 0)} <span style="font-size:.45em;color:var(--muted);font-weight:500">${esc(cur)}</span></div>
       <div class="delta num ${pn(td.pl)}" style="margin-top:6px">${signed(td.pl)} today (${pc(td.pct || 0)})</div></div>
+    <div class="trio">
+      <div><div class="eyebrow">Equity</div><div class="v num">${money(acc.equity || 0)}</div></div>
+      <div><div class="eyebrow">Floating</div><div class="v num ${pn(acc.floating)}">${signed(acc.floating || 0)}</div></div>
+    </div>
   </div>
   <div class="tiles full">
-    <div class="tile"><div class="eyebrow">Equity</div><div class="v num">${money(acc.equity || 0)}</div><div class="s num ${pn(acc.floating)}">Floating ${signed(acc.floating || 0)}</div></div>
+    <div class="tile"><div class="eyebrow">Open trades</div><div class="v num">${pos.length}</div><div class="s num">${pos.length ? "Floating " + signed(acc.floating || 0) : "None open"}</div></div>
     <div class="tile"><div class="eyebrow">${A.range}-day profit</div><div class="v num ${pn(sm.pl)}">${signed(sm.pl)}</div><div class="s num">Growth ${pc(sm.growth)}</div></div>
     <div class="tile"><div class="eyebrow">Win rate</div><div class="v num">${sm.n ? sm.win.toFixed(0) + "%" : "—"}</div><div class="s num">${sm.w} of ${sm.n} trades</div></div>
     <div class="tile"><div class="eyebrow">Green days</div><div class="v num">${sm.traded ? sm.green + " / " + sm.traded : "—"}</div><div class="s num">Best ${sm.best ? signed(sm.best.pl) : "—"}</div></div>
@@ -880,10 +908,10 @@ function renderPerf() {
     ${barsChart(sm.ds)}
   </div>
   <div class="card full chart"><h3>Balance</h3><div style="margin-top:8px">${lineChart(sm.ds.map(x => [x.d, x.end]), [], { id: "bal", title: "Account balance", color: "var(--brass)", dot: "var(--brass)", fmt: v => Math.round(v).toLocaleString("en-US"), empty: "The balance curve appears after the first closed trade." })}</div></div>
-  <div class="card"><h3>EAs on your charts</h3><p class="note" style="margin-top:2px">Attached in MT5 right now.</p>
-    <div style="margin-top:6px">${charts.length ? charts.map(c => `<div class="ea"><span class="ic">${esc((c.name || "?").slice(0, 1).toUpperCase())}</span><div style="min-width:0"><div class="nm">${esc(c.name)}</div><div class="note">${esc(c.sym)} · ${esc(c.tf)}</div></div></div>`).join("") : `<p class="muted">No EA is attached to a chart.</p>`}</div></div>
-  <div class="card"><h3>Profit by EA</h3><p class="note" style="margin-top:2px">Closed trades in the synced history, grouped by magic number.</p>
-    <div style="margin-top:6px">${eas.length ? eas.map(e => `<div class="barrow"><div style="min-width:0"><b style="overflow-wrap:anywhere">${esc(e.name)}</b><div class="note num">${e.n} trades · ${e.n ? Math.round(e.w / e.n * 100) : 0}% won</div></div><div class="num ${pn(e.pl)}" style="font-weight:600">${signed(e.pl)}</div><div class="track"><div class="fill" style="width:${(Math.abs(e.pl) / mxEa * 100).toFixed(1)}%;background:${e.pl >= 0 ? "var(--pos)" : "var(--neg)"}"></div></div></div>`).join("") : `<p class="muted">No closed trades yet.</p>`}</div></div>
+  <div class="card full" style="display:grid;gap:10px"><div class="ea" style="border:0;padding:0"><span class="ic">E</span><div style="min-width:0"><div class="nm">EagleVision Pro</div><div class="note">${charts[0] ? "Attached to " + esc(charts[0].sym) + " · " + esc(charts[0].tf) + ", scanning " + scan.length + " symbols" : "Running in MT5"}</div></div></div>
+    ${scan.length ? `<div class="symchips">${scan.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
+    ${eas[0] ? `<p class="note num">${eas[0].n} closed trades in the last ${acc.window || 90} days · ${eas[0].n ? Math.round(eas[0].w / eas[0].n * 100) : 0}% won · total <b class="${pn(eas[0].pl)}">${signed(eas[0].pl)}</b></p>` : `<p class="note">No closed EagleVision Pro trades yet.</p>`}
+    <p class="note">Only trades opened by EagleVision Pro are counted. Manual trades and other robots are left out.</p></div>
   <div class="card full"><h3>Day by day</h3><div class="tbl" style="margin-top:8px"><table><thead><tr><th>Date</th><th class="r">Trades</th><th class="r">Won</th><th class="r">P/L ${esc(cur)}</th><th class="r">Change</th></tr></thead><tbody>${dayRows || `<tr><td colspan="5" class="muted">No trading days in this period.</td></tr>`}</tbody></table></div></div>
   <div class="card"><h3>Open positions</h3><div class="tbl" style="margin-top:8px">${pos.length ? `<table><thead><tr><th>Symbol</th><th>Side</th><th class="r">Lots</th><th class="r">P/L</th></tr></thead><tbody>${pos.map(p => `<tr><td><b>${esc(p.sym)}</b><div class="note">${esc(p.ea)}</div></td><td><span class="side ${p.side === "buy" ? "buy" : "sell"}">${esc(p.side)}</span></td><td class="r num">${(+p.vol).toFixed(2)}</td><td class="r num ${pn(p.pl)}">${signed(p.pl)}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Nothing open.</p>`}</div></div>
   <div class="card"><h3>Latest closed trades</h3><div class="tbl" style="margin-top:8px">${deals.length ? `<table><thead><tr><th>When</th><th>Trade</th><th class="r">P/L</th></tr></thead><tbody>${deals.map(d => `<tr><td class="num note">${esc(new Date(d.t * 1000).toISOString().slice(5, 16).replace("T", " "))}</td><td><b>${esc(d.sym)}</b> <span class="note">${esc(d.side)} ${(+d.vol).toFixed(2)}</span><div class="note">${esc(d.ea)}</div></td><td class="r num ${pn(d.pl)}">${signed(d.pl)}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">No closed trades yet.</p>`}</div></div>`;
@@ -1033,7 +1061,46 @@ function render() {
   else if (S.sec === "account") { renderSync(null); renderAccount(); }
   else renderPerf();
 }
+const MI = {
+  key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/></svg>',
+  sync: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4"/></svg>',
+  link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
+  pdf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M12 12v5M9.500 14.500L12 17l2.500-2.500"/></svg>',
+  out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10"/></svg>',
+};
+function renderMenu() {
+  const m = $("menu"), open = !!A.menu; m.hidden = !open; $("scrim").hidden = !open; if (!open) return;
+  m.innerHTML = `<div class="who"><div class="eyebrow">Signed in as</div><div style="font-weight:600;overflow-wrap:anywhere">${esc(A.user ? A.user.email : "")}</div></div>
+    <button class="mi" id="mi-pass">${MI.key}Change password</button>
+    ${A.menu === "pass" ? `<form id="passform"><input id="np1" type="password" autocomplete="new-password" placeholder="New password (6+ characters)" minlength="6" required>
+      <input id="np2" type="password" autocomplete="new-password" placeholder="Repeat new password" minlength="6" required>
+      ${A.merr ? `<div class="note" style="color:var(--neg)">${esc(A.merr)}</div>` : ""}<button class="btn" ${A.mbusy ? "disabled" : ""}>${A.mbusy ? "Saving…" : "Save new password"}</button>
+      <div class="note">After changing it, type the new password in the EA inputs too.</div></form>` : ""}
+    <button class="mi" id="mi-refresh">${MI.sync}Refresh now</button>
+    <button class="mi" id="mi-link">${MI.link}Linked accounts and EA setup</button>
+    <button class="mi" id="mi-pdf">${MI.pdf}Download PDF report</button>
+    <button class="mi danger" id="mi-out">${MI.out}${A.sample ? "Exit preview" : "Sign out"}</button>
+    <div class="note" style="padding:8px 12px 6px">EagleTracker 2.1 · for EagleVision Pro</div>`;
+}
+function closeMenu() { A.menu = null; A.merr = ""; renderMenu(); }
+async function changePass() {
+  const a = $("np1").value, b = $("np2").value;
+  if (a.length < 6) { A.merr = "Use at least 6 characters."; renderMenu(); return; }
+  if (a !== b) { A.merr = "The two passwords do not match."; renderMenu(); return; }
+  if (A.sample) { A.merr = "Not available in the preview."; renderMenu(); return; }
+  A.mbusy = true; A.merr = ""; renderMenu();
+  try { const t = await token(); const j = await fbAuth("update", { idToken: t, password: a, returnSecureToken: true }); if (!j.email) j.email = A.user.email; setUser(j); A.mbusy = false; closeMenu(); toast("Password changed"); }
+  catch (e) { A.mbusy = false; A.merr = /CREDENTIAL_TOO_OLD|TOKEN_EXPIRED|INVALID_ID_TOKEN/.test(e.message || "") ? "For safety, sign out, sign in again, then change the password." : (e.message || "Could not change the password."); renderMenu(); }
+}
+document.addEventListener("submit", e => { if (e.target.id === "passform") { e.preventDefault(); changePass(); } });
+document.addEventListener("click", e => { if (e.target.id === "scrim") closeMenu(); });
 function etClick(b) {
+  if (b.id === "btn-menu") { A.menu = A.menu ? null : "open"; A.merr = ""; renderMenu(); return true; }
+  if (b.id === "mi-pass") { A.menu = A.menu === "pass" ? "open" : "pass"; A.merr = ""; renderMenu(); if (A.menu === "pass") $("np1").focus(); return true; }
+  if (b.id === "mi-refresh") { closeMenu(); A.sig = ""; loadAccounts(); refresh(true); loadWorld(true); toast("Refreshing"); return true; }
+  if (b.id === "mi-link") { closeMenu(); S.sec = "account"; store.set("sec", S.sec); render(); window.scrollTo({ top: 0 }); return true; }
+  if (b.id === "mi-pdf") { closeMenu(); S.sec = "perf"; render(); makePdf(); return true; }
+  if (b.id === "mi-out") { closeMenu(); signOut(); return true; }
   if (b.dataset.sec) { S.sec = b.dataset.sec; store.set("sec", S.sec); render(); window.scrollTo({ top: 0 }); if (S.sec === "perf") loadAccounts(); return true; }
   if (b.dataset.mode) { A.mode = b.dataset.mode; A.err = ""; A.ok = ""; render(); return true; }
   if (b.dataset.acct) { A.sel = b.dataset.acct; store.set("acct", A.sel); render(); return true; }
@@ -1052,7 +1119,7 @@ function boot() {
   if (A.user && A.user.uid === "sample") A.user = null;
   render();
   if (A.user) loadAccounts();
-  setInterval(() => { if (!document.hidden && A.user && !A.sample && S.sec === "perf") loadAccounts(); else if (!document.hidden && A.user && S.sec === "perf") renderSync(currentAcct()); }, 30000);
+  setInterval(() => { if (!document.hidden && A.user && !A.sample && S.sec === "perf") loadAccounts(); else if (!document.hidden && A.user && S.sec === "perf") renderSync(currentAcct()); }, 5000);
 }
 
 /* ---------- events ---------- */
