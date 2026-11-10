@@ -1,9 +1,8 @@
 {
-  "appId": "com.extremeearth.pairwire",
-  "appName": "Pairwire",
+  "appId": "com.eagletracker.app",
+  "appName": "EagleTracker",
   "webDir": "www",
-  "backgroundColor": "#12140f",
-  "android": {
-    "backgroundColor": "#12140f"
-  }
+  "backgroundColor": "#0b0f17",
+  "android": { "backgroundColor": "#0b0f17" },
+  "plugins": { "CapacitorHttp": { "enabled": true } }
 }

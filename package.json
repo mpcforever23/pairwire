@@ -1,11 +1,15 @@
 {
-  "name": "pairwire",
-  "version": "1.0.0",
+  "name": "eagletracker",
+  "version": "2.0.0",
   "private": true,
-  "description": "Pairwire: US news releases read through into gold and the dollar pairs",
+  "description": "EagleTracker: EA performance, news predictions and world news",
   "dependencies": {
     "@capacitor/android": "6.1.2",
-    "@capacitor/core": "6.1.2"
+    "@capacitor/core": "6.1.2",
+    "@capacitor/filesystem": "6.0.4",
+    "@capacitor/share": "6.0.4",
+    "jspdf": "2.5.1",
+    "jspdf-autotable": "3.8.2"
   },
   "devDependencies": {
     "@capacitor/assets": "3.0.5",

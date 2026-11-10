@@ -1,4 +1,4 @@
-name: Build Pairwire APK
+name: Build EagleTracker APK
 
 on:
   push:
@@ -21,12 +21,15 @@ jobs:
           java-version: 17
 
       - name: Install
-        run: npm install
+        run: |
+          npm install
+          cp node_modules/jspdf/dist/jspdf.umd.min.js www/
+          cp node_modules/jspdf-autotable/dist/jspdf.plugin.autotable.min.js www/
 
       - name: Create the Android project
         run: |
           npx cap add android
-          npx @capacitor/assets generate --android --iconBackgroundColor '#12140f' --splashBackgroundColor '#12140f' || echo "Icon step skipped"
+          npx @capacitor/assets generate --android --iconBackgroundColor '#0b0f17' --splashBackgroundColor '#0b0f17' || echo "Icon step skipped"
 
       - name: Sync web app into Android
         run: npx cap sync android
@@ -38,9 +41,9 @@ jobs:
           ./gradlew assembleDebug --no-daemon
 
       - name: Rename APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Pairwire.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk EagleTracker.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Pairwire-APK
-          path: Pairwire.apk
+          name: EagleTracker-APK
+          path: EagleTracker.apk
