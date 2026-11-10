@@ -683,7 +683,7 @@ function renderNews() {
    EagleTracker: accounts, EA performance, PDF report, world news
    ===================================================================== */
 // Firebase project of the app. The EagleVision Pro EA writes to the same database.
-const FB = { apiKey: "AIzaSyBUsA_mZf0_wMqrL0sOzPrc5mhH4EksD90", db: "https://eagletracker-ca2ff-default-rtdb.firebaseio.com" };
+const FB = { apiKey: "AIzaSyBUsA_mZf0_wMqrL0sOzPrc5mhH4EksD90", project: "eagletracker-ca2ff", db: "https://firestore.googleapis.com" };
 const FB_READY = /^AIza/.test(FB.apiKey) && /^https:\/\//.test(FB.db);
 const $ = id => document.getElementById(id);
 const A = {
@@ -761,9 +761,11 @@ async function loadAccounts() {
   if (!A.user || A.sample) return;
   try {
     const t = await token();
-    const r = await fetch(`${FB.db}/users/${A.user.uid}/accounts.json?auth=${t}`);
+    const r = await fetch(`https://firestore.googleapis.com/v1/projects/${FB.project}/databases/(default)/documents/users/${A.user.uid}/accounts?pageSize=50`, { headers: { Authorization: "Bearer " + t } });
     if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? "The database refused the request. Sign out and in again." : "Could not load your accounts.");
-    A.accounts = (await r.json()) || {}; A.loadErr = "";
+    const j = (await r.json()) || {}, out = {};
+    for (const d of j.documents || []) { try { const v = JSON.parse(d.fields.json.stringValue); out[String(v.login || d.name.split("/").pop())] = v; } catch (e) {} }
+    A.accounts = out; A.loadErr = "";
   } catch (e) { A.loadErr = e.message || "Could not load your accounts. Check your internet."; if (!A.accounts) A.accounts = null; }
   if (A.user && S.sec !== "news" && S.sec !== "world") render();
 }
