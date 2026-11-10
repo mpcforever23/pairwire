@@ -1,0 +1,9 @@
+{
+  "appId": "com.extremeearth.pairwire",
+  "appName": "Pairwire",
+  "webDir": "www",
+  "backgroundColor": "#12140f",
+  "android": {
+    "backgroundColor": "#12140f"
+  }
+}
