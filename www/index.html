@@ -1280,7 +1280,7 @@ function renderStats() {
          ["Max open positions", st.maxPos ?? "—"], ["Max signals / day", st.maxDay ?? "—"], ["Daily loss stop", st.dayLoss ? "−" + st.dayLoss + "%" : "off"],
          ["Stop loss", st.sl || "—"], ["Take profit", st.tp || "—"], ["Max SL vs TP", st.maxSl ? st.maxSl + "×" : "off"], ["Min R:R", st.minRR || "off"],
          ["TP split", st.tp1 != null ? `${st.tp1} at TP1 · ${st.runners} to TP2` : "—"], ["TP1 position", st.tp1Frac ? Math.round(st.tp1Frac * 100) + "% of the way to TP2" : "—"],
-         ["Break-even", st.beTp1 ? "runners at TP1" : st.be ? st.be + "% to mean" : "off"], ["Trailing", st.trail ? st.trail + " units behind price" : "off"], ["Time exit", st.hold ? st.hold + " bars" : "off"], ["Bands", (st.length ?? "—") + " · " + (st.mults || "—")],
+         ["Break-even", st.beTp1 ? "runners at TP1" : st.be ? st.be + "% to mean" : "off"], ["Trailing", st.trail ? st.trail + " units behind price" : "off"], ["Trend filter", st.trend ? st.trend.replace(/^ \| /, "") : "off"], ["Trend now", st.trendNow || "—"], ["Time exit", st.hold ? st.hold + " bars" : "off"], ["Bands", (st.length ?? "—") + " · " + (st.mults || "—")],
          ["Direction", (st.buys ? "Buys" : "") + (st.buys && st.sells ? " + " : "") + (st.sells ? "Sells" : "") || "none"],
          ["News shield", st.news ? `${st.newsCur} −${st.newsBefore}/+${st.newsAfter} min` : "off"], ["Close before news", st.newsClose >= 0 ? st.newsClose + " min before" : "no"]]
         .map(([k, v]) => `<div><div class="eyebrow">${esc(k)}</div><div class="v">${esc(v)}</div></div>`).join("")}
