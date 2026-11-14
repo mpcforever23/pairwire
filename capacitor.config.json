@@ -2,7 +2,7 @@
   "appId": "com.eagletracker.app",
   "appName": "EagleTracker",
   "webDir": "www",
-  "backgroundColor": "#090c16",
-  "android": { "backgroundColor": "#090c16" },
+  "backgroundColor": "#060a11",
+  "android": { "backgroundColor": "#060a11" },
   "plugins": { "CapacitorHttp": { "enabled": true } }
 }
