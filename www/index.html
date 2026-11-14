@@ -1105,7 +1105,7 @@ function posCard(p, cur) {
     bar = `<div><div class="slbar"><span class="ent" style="left:${entAt.toFixed(1)}%"></span><span class="dot" style="left:${posAt.toFixed(1)}%"></span></div>
       <div class="slrow num" style="margin-top:6px"><span>SL ${(+p.sl).toFixed(dg)}</span><span>entry ${(+p.open).toFixed(dg)}</span><span>TP ${(+p.tp).toFixed(dg)}</span></div></div>`;
   }
-  return `<div class="poscard"><div class="row between"><div class="row" style="gap:8px"><span class="side ${buy ? "buy" : "sell"}">${buy ? "Buy" : "Sell"}</span><b>${esc(p.sym)}</b><span class="note num">${(+p.vol).toFixed(2)} lot · #${esc(p.tk)}</span></div>
+  return `<div class="poscard"><div class="row between"><div class="row" style="gap:8px"><span class="side ${buy ? "buy" : "sell"}">${buy ? "Buy" : "Sell"}</span><b>${esc(p.sym)}</b><span class="note num">${(+p.vol).toFixed(2)} lot · #${esc(p.tk)}</span>${p.role ? `<span class="why ${/TP2/.test(p.role) ? "time" : "tp"}">${esc(p.role)}</span>` : ""}</div>
     <b class="num ${pn(p.pl)}" style="font-family:var(--f-display);font-size:17px">${signed(p.pl)} <span class="note">${esc(cur || "")}</span></b></div>
     ${bar}<div class="note num">Opened ${esc(fFull(p.u))} · ${fmtDur(Date.now() / 1000 - p.u)} ago${p.now ? " · now " + (+p.now).toFixed(dg) : ""}</div></div>`;
 }
@@ -1279,7 +1279,8 @@ function renderStats() {
       ${[["Risk per position", st.lot > 0 ? st.lot + " lot (fixed)" : (st.risk ?? "—") + "%"], ["Positions per signal", st.per ?? "—"], ["Risk per signal", st.risk != null && st.per ? (st.risk * st.per).toFixed(2) + "%" : "—"],
          ["Max open positions", st.maxPos ?? "—"], ["Max signals / day", st.maxDay ?? "—"], ["Daily loss stop", st.dayLoss ? "−" + st.dayLoss + "%" : "off"],
          ["Stop loss", st.sl || "—"], ["Take profit", st.tp || "—"], ["Max SL vs TP", st.maxSl ? st.maxSl + "×" : "off"], ["Min R:R", st.minRR || "off"],
-         ["Break-even", st.be ? st.be + "% to mean" : "off"], ["Time exit", st.hold ? st.hold + " bars" : "off"], ["Bands", (st.length ?? "—") + " · " + (st.mults || "—")],
+         ["TP split", st.tp1 != null ? `${st.tp1} at TP1 · ${st.runners} to TP2` : "—"], ["TP1 position", st.tp1Frac ? Math.round(st.tp1Frac * 100) + "% of the way to TP2" : "—"],
+         ["Break-even", st.beTp1 ? "runners at TP1" : st.be ? st.be + "% to mean" : "off"], ["Trailing", st.trail ? st.trail + " units behind price" : "off"], ["Time exit", st.hold ? st.hold + " bars" : "off"], ["Bands", (st.length ?? "—") + " · " + (st.mults || "—")],
          ["Direction", (st.buys ? "Buys" : "") + (st.buys && st.sells ? " + " : "") + (st.sells ? "Sells" : "") || "none"],
          ["News shield", st.news ? `${st.newsCur} −${st.newsBefore}/+${st.newsAfter} min` : "off"], ["Close before news", st.newsClose >= 0 ? st.newsClose + " min before" : "no"]]
         .map(([k, v]) => `<div><div class="eyebrow">${esc(k)}</div><div class="v">${esc(v)}</div></div>`).join("")}
