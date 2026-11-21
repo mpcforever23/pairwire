@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
-<title>EagleTracker</title>
+<title>EaglePro</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#0b0f17">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -119,7 +119,7 @@ button.wire-row:hover { background: var(--surface-2); }
 .toggle { display: inline-flex; align-items: center; gap: 10px; }
 .toggle input { width: 20px; height: 20px; accent-color: var(--brass); }
 
-/* ---------- EagleTracker shell ---------- */
+/* ---------- EaglePro shell ---------- */
 [hidden] { display: none !important; }
 body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 .appbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
@@ -215,7 +215,7 @@ body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 <body>
 <header class="appbar"><div class="wrap">
     <span class="logo" aria-hidden="true"><svg viewBox="0 0 104 104" width="22" height="22" fill="currentColor" fill-rule="evenodd"><path d="M8 90 L15 72 L8 68 L19 56 L12 50 L25 39 C33 23 51 13 68 17 L80 22 C95 27 101 44 94 61 L88 52 C87 46 82 43 74 45 L67 53 C65 61 61 65 55 67 L59 75 L49 77 L53 87 L41 89 L43 97 L24 95 Z M55 31 L70 27 L65 35 Z"/></svg></span>
-    <span class="name">EagleTracker</span><span class="sp"></span><span class="sync" id="sync"></span>
+    <span class="name">EaglePro</span><span class="sp"></span><span class="sync" id="sync"></span>
     <button class="menubtn" id="btn-menu" aria-label="Menu" aria-haspopup="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div></header>
   <section id="sec-perf" class="wrap sec two" hidden></section>
@@ -701,9 +701,9 @@ function renderNews() {
 }
 
 /* =====================================================================
-   EagleTracker: accounts, EA performance, PDF report, world news
+   EaglePro: accounts, EA performance, PDF report, world news
    ===================================================================== */
-// Firebase project of the app. The EagleVision Pro EA writes to the same database.
+// Firebase project of the app. The EagleVision PRO V2.0 EA writes to the same database.
 const FB = { apiKey: "AIzaSyBUsA_mZf0_wMqrL0sOzPrc5mhH4EksD90", project: "eagletracker-ca2ff", db: "https://firestore.googleapis.com" };
 const FB_READY = /^AIza/.test(FB.apiKey) && /^https:\/\//.test(FB.db);
 const $ = id => document.getElementById(id);
@@ -761,7 +761,7 @@ async function submitAuth() {
 function renderAuth() {
   const up = A.mode === "up", reset = A.mode === "reset";
   $("auth").innerHTML = `<div class="auth">
-    <div class="row"><span class="logo" aria-hidden="true"><svg viewBox="0 0 104 104" width="22" height="22" fill="currentColor" fill-rule="evenodd"><path d="M8 90 L15 72 L8 68 L19 56 L12 50 L25 39 C33 23 51 13 68 17 L80 22 C95 27 101 44 94 61 L88 52 C87 46 82 43 74 45 L67 53 C65 61 61 65 55 67 L59 75 L49 77 L53 87 L41 89 L43 97 L24 95 Z M55 31 L70 27 L65 35 Z"/></svg></span><span style="font-family:var(--f-display);font-weight:700;font-size:20px">EagleTracker</span></div>
+    <div class="row"><span class="logo" aria-hidden="true"><svg viewBox="0 0 104 104" width="22" height="22" fill="currentColor" fill-rule="evenodd"><path d="M8 90 L15 72 L8 68 L19 56 L12 50 L25 39 C33 23 51 13 68 17 L80 22 C95 27 101 44 94 61 L88 52 C87 46 82 43 74 45 L67 53 C65 61 61 65 55 67 L59 75 L49 77 L53 87 L41 89 L43 97 L24 95 Z M55 31 L70 27 L65 35 Z"/></svg></span><span style="font-family:var(--f-display);font-weight:700;font-size:20px">EaglePro</span></div>
     <div><h1>${up ? "Create your account" : reset ? "Reset your password" : "Welcome back"}</h1>
       <p class="muted" style="margin-top:6px">${up ? "Track every EA on your MT5 accounts, with daily results, news reads and reports." : reset ? "We will email you a link to choose a new password." : "Sign in to see how your EAs are doing."}</p></div>
     <form id="authform" novalidate>
@@ -795,7 +795,7 @@ async function loadAccounts() {
 }
 function sampleAccounts() {
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const days = {}; let bal = 5000; const today = new Date(); const names = ["EagleVision Pro", "Manual / no magic", "Magic 20260914"];
+  const days = {}; let bal = 5000; const today = new Date(); const names = ["EagleVision PRO V2.0", "Manual / no magic", "Magic 20260914"];
   const agg = names.map((n, i) => ({ magic: [20261013, 0, 20260914][i], name: n, pl: 0, n: 0, w: 0 }));
   const deals = [];
   for (let i = 44; i >= 0; i--) {
@@ -806,9 +806,9 @@ function sampleAccounts() {
   }
   return { "52001234": { login: 52001234, server: "Exness-MT5Real8", broker: "Exness Technologies Ltd", name: "Sample account", currency: "USD", leverage: 500, demo: false,
     balance: +bal.toFixed(2), equity: +(bal + 38.4).toFixed(2), margin: 121.5, floating: 38.4, updated: Math.floor(Date.now() / 1000) - 25, today: Object.keys(days).pop(),
-    charts: [{ name: "EagleVision Pro", sym: "XAUUSD", tf: "H1" }], scan: ["XAUUSD", "BTCUSD", "Volatility 75 Index", "Volatility 10 Index", "Step Index", "EURUSD"], window: 90,
+    charts: [{ name: "EagleVision PRO V2.0", sym: "XAUUSD", tf: "H1" }], scan: ["XAUUSD", "BTCUSD", "Volatility 75 Index", "Volatility 10 Index", "Step Index", "EURUSD"], window: 90,
     eas: agg.map(e => ({ ...e, pl: +e.pl.toFixed(2) })), days,
-    positions: [{ sym: "XAUUSD", side: "buy", vol: 0.1, open: 4008.35, pl: 26.1, ea: "EagleVision Pro" }, { sym: "XAUUSD", side: "buy", vol: 0.1, open: 4010.1, pl: 12.3, ea: "EagleVision Pro" }],
+    positions: [{ sym: "XAUUSD", side: "buy", vol: 0.1, open: 4008.35, pl: 26.1, ea: "EagleVision PRO V2.0" }, { sym: "XAUUSD", side: "buy", vol: 0.1, open: 4010.1, pl: 12.3, ea: "EagleVision PRO V2.0" }],
     deals: deals.slice(-40).reverse() } };
 }
 function currentAcct() {
@@ -855,10 +855,10 @@ function renderSync(acc) {
 }
 function linkSteps() {
   return `<ol class="steps">
-    <li><div><b>Attach EagleVision Pro</b> to any chart in MT5 on your PC or VPS.</div></li>
-    <li><div>In the EA inputs, open <b>EagleTracker App</b> and type the same <b>email and password</b> you use here.</div></li>
+    <li><div><b>Attach EagleVision PRO V2.0</b> to any chart in MT5 on your PC or VPS.</div></li>
+    <li><div>In the EA inputs, open <b>EaglePro App</b> and type the same <b>email and password</b> you use here.</div></li>
     <li><div>In MT5 go to <b>Tools → Options → Expert Advisors</b>, tick <b>Allow WebRequest</b> and add:<br><span class="mono" style="font-size:12.5px;overflow-wrap:anywhere">https://identitytoolkit.googleapis.com</span><br><span class="mono" style="font-size:12.5px;overflow-wrap:anywhere">${esc(FB_READY ? FB.db : "the database address shown in the EA")}</span></div></li>
-    <li><div>Within a minute the EA dashboard shows <b>EagleTracker: linked</b> and your account appears here.</div></li>
+    <li><div>Within a minute the EA dashboard shows <b>EaglePro: linked</b> and your account appears here.</div></li>
   </ol>`;
 }
 function renderPerf() {
@@ -873,7 +873,7 @@ function renderPerf() {
   renderSync(acc);
   if (!acc) {
     el.innerHTML = `<div class="card full" style="display:grid;gap:14px"><span class="badge">No MT5 account linked yet</span><h2 style="font-size:26px">Link your first account</h2>
-      <p class="muted">EagleTracker reads your results from the EagleVision Pro EA running in MT5. Your MT5 password never leaves your computer.</p>${linkSteps()}
+      <p class="muted">EaglePro reads your results from the EagleVision PRO V2.0 EA running in MT5. Your MT5 password never leaves your computer.</p>${linkSteps()}
       <button class="btn ghost" id="btn-reload">I have done this, check again</button></div>`;
     return;
   }
@@ -908,10 +908,10 @@ function renderPerf() {
     ${barsChart(sm.ds)}
   </div>
   <div class="card full chart"><h3>Balance</h3><div style="margin-top:8px">${lineChart(sm.ds.map(x => [x.d, x.end]), [], { id: "bal", title: "Account balance", color: "var(--brass)", dot: "var(--brass)", fmt: v => Math.round(v).toLocaleString("en-US"), empty: "The balance curve appears after the first closed trade." })}</div></div>
-  <div class="card full" style="display:grid;gap:10px"><div class="ea" style="border:0;padding:0"><span class="ic">E</span><div style="min-width:0"><div class="nm">EagleVision Pro</div><div class="note">${charts[0] ? "Attached to " + esc(charts[0].sym) + " · " + esc(charts[0].tf) + ", scanning " + scan.length + " symbols" : "Running in MT5"}</div></div></div>
-    ${scan.length ? `<div class="symchips">${scan.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
-    ${eas[0] ? `<p class="note num">${eas[0].n} closed trades in the last ${acc.window || 90} days · ${eas[0].n ? Math.round(eas[0].w / eas[0].n * 100) : 0}% won · total <b class="${pn(eas[0].pl)}">${signed(eas[0].pl)}</b></p>` : `<p class="note">No closed EagleVision Pro trades yet.</p>`}
-    <p class="note">Only trades opened by EagleVision Pro are counted. Manual trades and other robots are left out.</p></div>
+  <div class="card full" style="display:grid;gap:10px"><div class="ea" style="border:0;padding:0"><span class="ic">E</span><div style="min-width:0"><div class="nm">EagleVision PRO V2.0</div><div class="note">${charts[0] ? "Attached to " + esc(charts[0].sym) + " · " + esc(charts[0].tf) + (scan.length > 1 ? ", scanning " + scan.length + " symbols" : "") : "Running in MT5"}</div></div></div>
+    ${scan.length > 1 ? `<div class="symchips">${scan.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
+    ${eas[0] ? `<p class="note num">${eas[0].n} closed trades in the last ${acc.window || 90} days · ${eas[0].n ? Math.round(eas[0].w / eas[0].n * 100) : 0}% won · total <b class="${pn(eas[0].pl)}">${signed(eas[0].pl)}</b></p>` : `<p class="note">No closed EagleVision PRO V2.0 trades yet.</p>`}
+    <p class="note">Only trades opened by EagleVision PRO V2.0 are counted. Manual trades and other robots are left out.</p></div>
   <div class="card full"><h3>Day by day</h3><div class="tbl" style="margin-top:8px"><table><thead><tr><th>Date</th><th class="r">Trades</th><th class="r">Won</th><th class="r">P/L ${esc(cur)}</th><th class="r">Change</th></tr></thead><tbody>${dayRows || `<tr><td colspan="5" class="muted">No trading days in this period.</td></tr>`}</tbody></table></div></div>
   <div class="card"><h3>Open positions</h3><div class="tbl" style="margin-top:8px">${pos.length ? `<table><thead><tr><th>Symbol</th><th>Side</th><th class="r">Lots</th><th class="r">P/L</th></tr></thead><tbody>${pos.map(p => `<tr><td><b>${esc(p.sym)}</b><div class="note">${esc(p.ea)}</div></td><td><span class="side ${p.side === "buy" ? "buy" : "sell"}">${esc(p.side)}</span></td><td class="r num">${(+p.vol).toFixed(2)}</td><td class="r num ${pn(p.pl)}">${signed(p.pl)}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Nothing open.</p>`}</div></div>
   <div class="card"><h3>Latest closed trades</h3><div class="tbl" style="margin-top:8px">${deals.length ? `<table><thead><tr><th>When</th><th>Trade</th><th class="r">P/L</th></tr></thead><tbody>${deals.map(d => `<tr><td class="num note">${esc(new Date(d.t * 1000).toISOString().slice(5, 16).replace("T", " "))}</td><td><b>${esc(d.sym)}</b> <span class="note">${esc(d.side)} ${(+d.vol).toFixed(2)}</span><div class="note">${esc(d.ea)}</div></td><td class="r num ${pn(d.pl)}">${signed(d.pl)}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">No closed trades yet.</p>`}</div></div>`;
@@ -933,7 +933,7 @@ async function makePdf() {
     const td = (acc.days || {})[acc.today] || { pl: 0, pct: 0 };
     doc.setFillColor(11, 15, 23); doc.rect(0, 0, W, 92, "F");
     doc.setFillColor(46, 196, 182); doc.rect(0, 92, W, 3, "F");
-    doc.setTextColor(255); doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.text("EagleTracker", 40, 44);
+    doc.setTextColor(255); doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.text("EaglePro", 40, 44);
     doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(190, 200, 215);
     doc.text(`EA performance report  |  last ${A.range} days`, 40, 64);
     doc.text(asc(new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC"), W - 40, 44, { align: "right" });
@@ -964,8 +964,8 @@ async function makePdf() {
         body: acc.deals.slice(0, 40).map(d => [new Date(d.t * 1000).toISOString().slice(0, 16).replace("T", " "), asc(d.sym), asc(d.side), (+d.vol).toFixed(2), asc(d.ea), asc(signed(d.pl))]) });
     }
     const pages = doc.getNumberOfPages();
-    for (let i = 1; i <= pages; i++) { doc.setPage(i); doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(130); doc.text(`EagleTracker report  |  page ${i} of ${pages}  |  Past results do not guarantee future results.`, 40, doc.internal.pageSize.getHeight() - 24); }
-    const name = `EagleTracker_${acc.login}_${new Date().toISOString().slice(0, 10)}.pdf`;
+    for (let i = 1; i <= pages; i++) { doc.setPage(i); doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(130); doc.text(`EaglePro report  |  page ${i} of ${pages}  |  Past results do not guarantee future results.`, 40, doc.internal.pageSize.getHeight() - 24); }
+    const name = `EaglePro_${acc.login}_${new Date().toISOString().slice(0, 10)}.pdf`;
     const C = window.Capacitor;
     if (C && C.isNativePlatform && C.isNativePlatform()) {
       const call = (plugin, method, opts) => C.nativePromise ? C.nativePromise(plugin, method, opts) : C.Plugins[plugin][method](opts);
@@ -1080,7 +1080,7 @@ function renderMenu() {
     <button class="mi" id="mi-link">${MI.link}Linked accounts and EA setup</button>
     <button class="mi" id="mi-pdf">${MI.pdf}Download PDF report</button>
     <button class="mi danger" id="mi-out">${MI.out}${A.sample ? "Exit preview" : "Sign out"}</button>
-    <div class="note" style="padding:8px 12px 6px">EagleTracker 2.1 · for EagleVision Pro</div>`;
+    <div class="note" style="padding:8px 12px 6px">EaglePro 3.0 · for EagleVision PRO V2.0</div>`;
 }
 function closeMenu() { A.menu = null; A.merr = ""; renderMenu(); }
 async function changePass() {

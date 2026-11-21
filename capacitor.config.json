@@ -1,6 +1,6 @@
 {
   "appId": "com.eagletracker.app",
-  "appName": "EagleTracker",
+  "appName": "EaglePro",
   "webDir": "www",
   "backgroundColor": "#090c16",
   "android": { "backgroundColor": "#090c16" },

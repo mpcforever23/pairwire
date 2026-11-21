@@ -1,8 +1,8 @@
 {
-  "name": "eagletracker",
-  "version": "2.0.0",
+  "name": "eaglepro",
+  "version": "3.0.0",
   "private": true,
-  "description": "EagleTracker: EA performance, news predictions and world news",
+  "description": "EaglePro: EagleVision PRO V2.0 performance, news predictions and world news",
   "dependencies": {
     "@capacitor/android": "6.1.2",
     "@capacitor/core": "6.1.2",

@@ -1,4 +1,4 @@
-name: Build EagleTracker APK
+name: Build EaglePro APK
 
 on:
   push:
@@ -41,9 +41,9 @@ jobs:
           ./gradlew assembleDebug --no-daemon
 
       - name: Rename APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk EagleTracker.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk EaglePro.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: EagleTracker-APK
-          path: EagleTracker.apk
+          name: EaglePro-APK
+          path: EaglePro.apk
