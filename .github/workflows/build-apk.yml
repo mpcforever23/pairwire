@@ -1,4 +1,4 @@
-name: Build EaglePro APK
+name: Build DarkEngine APK
 
 on:
   push:
@@ -29,7 +29,8 @@ jobs:
       - name: Create the Android project
         run: |
           npx cap add android
-          npx @capacitor/assets generate --android --iconBackgroundColor '#3b3390' --splashBackgroundColor '#090c16' || echo "Icon step skipped"
+          npx @capacitor/assets generate --android --iconBackgroundColor '#07080b' --splashBackgroundColor '#07080b' || echo "Icon step skipped"
+          python3 android-res/patch_android.py
 
       - name: Sync web app into Android
         run: npx cap sync android
@@ -41,9 +42,9 @@ jobs:
           ./gradlew assembleDebug --no-daemon
 
       - name: Rename APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk EaglePro.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk DarkEngine.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: EaglePro-APK
-          path: EaglePro.apk
+          name: DarkEngine-APK
+          path: DarkEngine.apk

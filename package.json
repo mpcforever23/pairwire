@@ -1,12 +1,14 @@
 {
-  "name": "eaglepro",
-  "version": "3.0.0",
+  "name": "darkengine",
+  "version": "4.0.0",
   "private": true,
-  "description": "EaglePro: EagleVision PRO V2.0 performance, news predictions and world news",
+  "description": "DarkEngine: the phone app for the DarkEngine V2.0 MT5 robot. Results, trades, news and alerts.",
   "dependencies": {
     "@capacitor/android": "6.1.2",
+    "@capacitor/background-runner": "2.0.0",
     "@capacitor/core": "6.1.2",
     "@capacitor/filesystem": "6.0.4",
+    "@capacitor/local-notifications": "6.1.3",
     "@capacitor/share": "6.0.4",
     "jspdf": "2.5.1",
     "jspdf-autotable": "3.8.2"

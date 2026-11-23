@@ -3,227 +3,272 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
-<title>EaglePro</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<meta name="theme-color" content="#0b0f17">
+<title>DarkEngine</title>
+<meta name="theme-color" content="#07080b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: bottom tab bar with four sections; cards in one column on phones, two-up from 900px. Midnight indigo ground, gold accent, indigo-to-violet hero. */
+/* DarkEngine: carbon black ground, ember orange as the one accent, lime for profit, crimson for loss. */
 :root {
   color-scheme: dark;
-  --bg: #090c16; --surface: #11162a; --surface-2: #1b2242; --fg: #eef0fa; --muted: #949bbd;
-  --line: #272f55; --brass: #f4b94a; --brass-ink: #1c1303; --gold: #ffd978;
-  --hot: #ff5d6c; --cool: #6aa8ff; --pos: #2fd08a; --neg: #ff5d6c;
-  --hero-a: #2a3a8f; --hero-b: #5b2d8e; --violet: #9b8cff;
-  --f-display: "Space Grotesk", "Segoe UI", Roboto, system-ui, sans-serif;
-  --f-sans: "Inter", "Segoe UI", Roboto, system-ui, sans-serif;
-  --f-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --bg: #07080b; --bg-2: #0b0d11; --surface: #101217; --surface-2: #171a20; --surface-3: #1f232b;
+  --line: #24282f; --line-2: #333843; --fg: #f3efe9; --muted: #8d929c; --dim: #5d626c;
+  --ember: #ff6a1a; --ember-2: #ffb347; --ember-ink: #1c0a01; --ember-soft: rgba(255,106,26,.14);
+  --pos: #a3f35b; --neg: #ff4d6d; --cool: #45c8ff; --hot: #ff6a1a;
+  /* names used by the news module */
+  --brass: var(--ember); --brass-ink: var(--ember-ink); --gold: var(--ember-2);
+  --f-display: "Sora", "Segoe UI", Roboto, system-ui, sans-serif;
+  --f-sans: "Manrope", "Segoe UI", Roboto, system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --r: 18px;
 }
 * { box-sizing: border-box; }
-html, body { background: var(--bg); color: var(--fg); }
-body { font-family: var(--f-sans); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
-h1, h2, h3 { font-family: var(--f-display); font-weight: 600; letter-spacing: -.01em; line-height: 1.15; text-wrap: balance; margin: 0; }
+[hidden] { display: none !important; }
+html, body { background: var(--bg); color: var(--fg); margin: 0; }
+body { font-family: var(--f-sans); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; padding-top: env(safe-area-inset-top, 0px); padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+  background: radial-gradient(900px 420px at 85% -120px, rgba(255,106,26,.13), transparent 70%), radial-gradient(700px 380px at -10% 110%, rgba(255,179,71,.05), transparent 70%); }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 700; letter-spacing: -.015em; line-height: 1.15; margin: 0; text-wrap: balance; }
 p { margin: 0; text-wrap: pretty; }
 button, select, input { font: inherit; color: inherit; }
-button { cursor: pointer; }
-:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
 .num { font-variant-numeric: tabular-nums; }
 .mono { font-family: var(--f-mono); }
-.eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.eyebrow { font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
 .muted { color: var(--muted); }
-.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); max-width: 1180px; margin: 0 auto; }
+.note { font-size: 12.5px; color: var(--muted); }
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); max-width: 1120px; margin: 0 auto; }
+.pos, .up { color: var(--pos); } .neg, .down { color: var(--neg); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
-header.top { border-bottom: 1px solid var(--line); }
-header.top .wrap { padding-block: 18px 16px; display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-end; justify-content: space-between; }
-header .brand .eyebrow { color: var(--brass); }
-header h1 { font-size: 34px; margin-top: 2px; }
-header .sub { color: var(--muted); font-size: 13.5px; max-width: 46ch; margin-top: 4px; }
+/* top bar */
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(7,8,11,.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.topbar .wrap { display: flex; align-items: center; gap: 10px; padding-block: 12px; }
+.mark { width: 34px; height: 34px; flex: none; filter: drop-shadow(0 0 10px rgba(255,106,26,.45)); }
+.mark svg { width: 100%; height: 100%; display: block; }
+.word { font-family: var(--f-display); font-weight: 800; font-size: 18px; letter-spacing: .14em; }
+.word b { color: var(--ember); font-weight: 800; }
+.topbar .sp { flex: 1; }
+.iconbtn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; color: var(--fg); flex: none; position: relative; }
+.iconbtn svg { width: 19px; height: 19px; }
+.iconbtn .dot { position: absolute; top: 8px; right: 9px; width: 7px; height: 7px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 2px var(--surface); }
+.sync { font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.sync:empty { display: none; }
+.sync i { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); }
+.sync.live { color: var(--pos); } .sync.live i { background: var(--pos); box-shadow: 0 0 10px var(--pos); animation: beat 1.6s ease-in-out infinite; }
+.sync.stale { color: var(--neg); } .sync.stale i { background: var(--neg); }
+@keyframes beat { 50% { opacity: .35; } }
+
+/* floating dock */
+.dock { position: fixed; z-index: 30; left: 50%; transform: translateX(-50%); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); width: min(440px, calc(100vw - 24px)); display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px; border-radius: 22px; background: rgba(16,18,23,.92); border: 1px solid var(--line-2); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 18px 40px -12px #000; }
+.dockbtn { border: 0; background: none; border-radius: 16px; padding: 8px 4px 7px; display: grid; justify-items: center; gap: 2px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+.dockbtn svg { width: 21px; height: 21px; }
+.dockbtn[aria-current="page"] { background: var(--ember); color: var(--ember-ink); box-shadow: 0 6px 18px -6px rgba(255,106,26,.8); }
+
+/* sections + cards */
+.sec { display: grid; gap: 14px; padding-block: 8px 24px; }
+.sec > * { min-width: 0; }
+@media (min-width: 900px) { .sec.two { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } .sec.two .full { grid-column: 1 / -1; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; min-width: 0; }
+.card h3 { font-size: 17px; }
+.sechead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.sechead h2 { font-size: 22px; }
+.btn { border: 0; background: var(--ember); color: var(--ember-ink); border-radius: 12px; padding: 10px 16px; font-weight: 800; letter-spacing: .01em; }
+.btn.ghost { background: var(--surface-2); color: var(--fg); border: 1px solid var(--line-2); font-weight: 700; }
+.btn.wide { width: 100%; padding: 13px 16px; font-size: 15px; }
+.btn:disabled { opacity: .55; }
+.linkbtn { background: none; border: 0; color: var(--ember); padding: 0; font-weight: 700; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 3px 9px; border-radius: 8px; background: var(--surface-3); color: var(--muted); }
+.badge.ember { background: var(--ember-soft); color: var(--ember); }
+.badge.pos { background: rgba(163,243,91,.12); color: var(--pos); } .badge.neg { background: rgba(255,77,109,.13); color: var(--neg); }
+.badge.cool { background: rgba(69,200,255,.12); color: var(--cool); }
+
+/* reactor hero */
+.reactor { position: relative; overflow: hidden; border-radius: 24px; padding: 20px; border: 1px solid rgba(255,106,26,.35);
+  background: radial-gradient(420px 260px at 100% 0%, rgba(255,106,26,.32), transparent 70%), linear-gradient(160deg, #15110e, #0c0d11 60%); display: grid; gap: 16px; }
+.reactor::after { content: ""; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px; border-radius: 50%; border: 1px dashed rgba(255,106,26,.25); pointer-events: none; }
+.reactor .acct { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; flex-wrap: wrap; position: relative; z-index: 1; }
+.reactor .big { font-family: var(--f-mono); font-weight: 700; font-size: clamp(30px, 9vw, 42px); line-height: 1.05; letter-spacing: -.03em; }
+.cur { font-family: var(--f-sans); font-size: 14px; color: var(--muted); font-weight: 700; margin-left: 6px; }
+.gauges { display: grid; grid-template-columns: 1.25fr 1fr .7fr; gap: 8px; position: relative; z-index: 1; }
+.gauge { background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.06); border-radius: 14px; padding: 10px 12px; min-width: 0; }
+.gauge .v { font-family: var(--f-mono); font-weight: 700; font-size: clamp(12px, 3.5vw, 16px); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pause { display: flex; gap: 12px; align-items: flex-start; border-radius: 16px; padding: 12px 14px; background: linear-gradient(90deg, rgba(255,179,71,.16), rgba(255,179,71,.04)); border: 1px solid rgba(255,179,71,.35); }
+.pause svg { width: 20px; height: 20px; color: var(--ember-2); flex: none; margin-top: 2px; }
+
+/* period result cards */
+.periods { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 560px) { .periods { grid-template-columns: 1fr; } }
+.period { position: relative; border-radius: var(--r); padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); overflow: hidden; display: grid; gap: 4px; min-width: 0; }
+.period::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--line-2); }
+.period.up::before { background: var(--pos); } .period.down::before { background: var(--neg); }
+.period .v { font-family: var(--f-mono); font-weight: 700; font-size: 26px; letter-spacing: -.02em; line-height: 1.15; }
+.period.empty .v { font-family: var(--f-sans); font-size: 15px; color: var(--muted); font-weight: 600; }
+.period .foot { font-size: 11.5px; color: var(--dim); }
+.running { display: grid; gap: 8px; }
+.run { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: center; }
+.run .bar { grid-column: 1 / -1; height: 5px; border-radius: 3px; background: var(--surface-3); overflow: hidden; }
+.run .bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--ember), var(--ember-2)); }
+.run .v { font-family: var(--f-mono); font-weight: 700; }
+
+/* segmented control */
+.seg { display: inline-flex; padding: 3px; gap: 3px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.seg button { background: none; border: 0; padding: 6px 12px; font-size: 12.5px; font-weight: 700; color: var(--muted); border-radius: 9px; }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.chart svg { width: 100%; height: auto; display: block; }
+
+/* trade cards */
+.trades { display: grid; gap: 10px; }
+.trade { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; }
+.trade .dir { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; font-size: 11px; letter-spacing: .06em; }
+.trade .dir.buy { background: rgba(163,243,91,.13); color: var(--pos); } .trade .dir.sell { background: rgba(255,77,109,.14); color: var(--neg); }
+.trade .sym { font-family: var(--f-display); font-weight: 700; font-size: 16px; overflow-wrap: anywhere; }
+.trade .pl { font-family: var(--f-mono); font-weight: 700; font-size: 16px; text-align: right; }
+.trade .meta { grid-column: 2 / -1; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.side { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 1px 8px; border-radius: 6px; margin-top: 2px; }
+.side.buy { background: var(--pos); color: #0d1a03; } .side.sell { background: var(--neg); color: #22030a; }
+
+/* lists, tables, forms */
+table { border-collapse: collapse; width: 100%; }
+.tbl { overflow-x: auto; }
+th, td { text-align: left; padding: 9px 6px; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: middle; }
+th { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td.r, th.r { text-align: right; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; font-size: 14px; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; }
+.symchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.symchips span { background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 600; }
+.engine { display: flex; align-items: center; gap: 12px; }
+.engine .ic { width: 42px; height: 42px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--line-2); display: grid; place-items: center; flex: none; padding: 6px; }
+.steps { display: grid; gap: 12px; counter-reset: st; padding: 0; margin: 0; list-style: none; }
+.steps li { counter-increment: st; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: start; }
+.steps li::before { content: counter(st); width: 28px; height: 28px; border-radius: 9px; background: var(--ember-soft); color: var(--ember); display: grid; place-items: center; font-weight: 800; font-size: 13px; }
+.switch { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.switch:last-child { border-bottom: 0; }
+.switch input[type=checkbox] { appearance: none; -webkit-appearance: none; width: 46px; height: 26px; border-radius: 999px; background: var(--surface-3); border: 1px solid var(--line-2); position: relative; flex: none; transition: background .2s; }
+.switch input[type=checkbox]::after { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted); transition: transform .2s, background .2s; }
+.switch input[type=checkbox]:checked { background: var(--ember); border-color: var(--ember); }
+.switch input[type=checkbox]:checked::after { transform: translateX(20px); background: var(--ember-ink); }
+.newsitem { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 4px 12px; padding: 12px 0; border-bottom: 1px solid var(--line); align-items: center; }
+.newsitem:last-child { border-bottom: 0; }
+.newsitem .cur { font-family: var(--f-mono); font-weight: 700; font-size: 13px; text-align: center; padding: 8px 0; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line-2); }
+.newsitem .cur.hi { color: var(--ember); border-color: rgba(255,106,26,.45); background: var(--ember-soft); }
+.newsitem.past { opacity: .5; }
+
+/* auth */
+.auth { min-height: 100vh; display: grid; align-content: center; gap: 20px; max-width: 420px; margin: 0 auto; padding-block: 40px; }
+.auth .hero-mark { width: 92px; height: 92px; filter: drop-shadow(0 0 28px rgba(255,106,26,.55)); }
+.auth h1 { font-size: 30px; }
+.auth form { display: grid; gap: 12px; }
+.auth label { display: grid; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.input { width: 100%; background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; padding: 13px 14px; font-size: 16px; color: var(--fg); }
+.input:focus { border-color: var(--ember); outline: none; }
+.err { color: var(--neg); font-size: 14px; } .okmsg { color: var(--pos); font-size: 14px; }
+
+/* menu sheet */
+.scrim { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.6); }
+.menu { position: fixed; z-index: 41; top: calc(env(safe-area-inset-top, 0px) + 62px); right: max(12px, env(safe-area-inset-right, 0px)); width: min(320px, calc(100vw - 24px)); background: var(--surface); border: 1px solid var(--line-2); border-radius: 18px; padding: 8px; box-shadow: 0 30px 60px -20px #000; max-height: calc(100vh - 140px); overflow: auto; }
+.menu .who { padding: 10px 12px 12px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+.menu .mi { display: flex; align-items: center; gap: 12px; width: 100%; background: none; border: 0; border-radius: 12px; padding: 11px 12px; text-align: left; font-size: 15px; font-weight: 600; }
+.menu .mi:hover, .menu .mi:focus-visible { background: var(--surface-2); }
+.menu .mi svg { width: 19px; height: 19px; color: var(--ember); flex: none; }
+.menu .mi.danger { color: var(--neg); } .menu .mi.danger svg { color: var(--neg); }
+.menu form { display: grid; gap: 8px; padding: 6px 12px 12px; }
+.menu input { background: var(--bg); border: 1px solid var(--line-2); border-radius: 12px; padding: 10px 12px; width: 100%; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 14px; font-weight: 700; font-size: 14px; z-index: 50; max-width: calc(100% - 32px); box-shadow: 0 12px 30px -10px #000; }
+.toast.trade { background: var(--ember); color: var(--ember-ink); }
+.skel { border-radius: var(--r); background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%); background-size: 200% 100%; animation: sk 1.2s linear infinite; }
+@keyframes sk { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel, .sync.live i { animation: none; } }
+
+/* world news */
+.story { display: grid; gap: 10px; }
+.story img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 14px; background: var(--surface-2); }
+.story h3 { font-size: 19px; line-height: 1.25; }
+.story .meta { font-size: 12px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.story .src { color: var(--ember); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: 10.5px; }
+.story p { color: #cfcac2; }
+.story a { color: var(--ember); font-weight: 700; text-decoration: none; }
+
+/* ---------- news module (calendar / prediction / charts) ---------- */
 .clockrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.pill { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: 13px; white-space: nowrap; }
-.pill b { font-weight: 600; }
-
-
-.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; padding-block: 18px 48px; }
+.pill { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; font-size: 12.5px; white-space: nowrap; }
+.pill b { font-weight: 700; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding-block: 12px 8px; }
 .rail > div { min-width: 0; }
-@media (min-width: 900px) { .layout { grid-template-columns: 220px minmax(0, 1fr); gap: 28px; } }
+@media (min-width: 900px) { .layout { grid-template-columns: 210px minmax(0, 1fr); gap: 24px; } }
 .rail { display: grid; gap: 14px; align-content: start; min-width: 0; }
 .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
 .chips::-webkit-scrollbar { display: none; }
-@media (min-width: 900px) { .chips { flex-direction: column; overflow: visible; } }
-.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 12px; text-align: left; white-space: nowrap; flex: none; }
-.chip[aria-pressed="true"] { background: var(--brass); color: var(--brass-ink); border-color: var(--brass); font-weight: 600; }
-.chip small { display: block; font-size: 11.5px; opacity: .75; font-variant-numeric: tabular-nums; }
-.chip.gold:not([aria-pressed="true"]) { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); }
-
-main { min-width: 0; display: grid; gap: 18px; align-content: start; }
-.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-.tab { border: 1px solid var(--line); background: transparent; border-radius: 12px; padding: 8px 16px; }
-.tab[aria-selected="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); font-weight: 600; }
-
-.card { border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 16px; min-width: 0; }
-.card h3 { font-size: 21px; }
+@media (min-width: 900px) { .rail .chips { flex-direction: column; overflow: visible; } }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 8px 12px; text-align: left; white-space: nowrap; flex: none; font-weight: 600; }
+.chip[aria-pressed="true"] { background: var(--ember); color: var(--ember-ink); border-color: var(--ember); font-weight: 800; }
+.chip small { display: block; font-size: 11px; opacity: .75; font-variant-numeric: tabular-nums; }
+.chip.gold:not([aria-pressed="true"]) { border-color: rgba(255,179,71,.45); }
+main { min-width: 0; display: grid; gap: 16px; align-content: start; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 8px 14px; font-weight: 700; color: var(--muted); }
+.tab[aria-selected="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
 .grid2 { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-.stat .v { font-family: var(--f-display); font-size: 30px; line-height: 1.1; margin-top: 4px; }
+.stat .v { font-family: var(--f-mono); font-weight: 700; font-size: 26px; line-height: 1.1; margin-top: 4px; }
 .stat .s { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
-
-.label { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; border: 1px solid transparent; white-space: nowrap; }
-.label.hot { background: color-mix(in srgb, var(--hot) 20%, transparent); color: var(--hot); border-color: color-mix(in srgb, var(--hot) 45%, transparent); }
-.label.cool { background: color-mix(in srgb, var(--cool) 20%, transparent); color: var(--cool); border-color: color-mix(in srgb, var(--cool) 45%, transparent); }
+.label { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 2px 10px; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; border: 1px solid transparent; white-space: nowrap; }
+.label.hot { background: rgba(255,106,26,.16); color: var(--hot); border-color: rgba(255,106,26,.4); }
+.label.cool { background: rgba(69,200,255,.14); color: var(--cool); border-color: rgba(69,200,255,.4); }
 .label.inline { background: var(--surface-2); color: var(--fg); border-color: var(--line); }
 .label.none { background: transparent; color: var(--muted); border-color: var(--line); }
-.state { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
-.state.ahead { color: var(--brass); } .state.live { color: var(--brass); } .state.out { color: var(--muted); }
-
-table { border-collapse: collapse; width: 100%; }
-.tbl { overflow-x: auto; }
-th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: middle; }
-th { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
-td.r, th.r { text-align: right; }
-.up { color: var(--pos); } .down { color: var(--neg); }
-.field { width: 70px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-variant-numeric: tabular-nums; }
+.state { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; }
+.state.ahead, .state.live { color: var(--ember); } .state.out { color: var(--muted); }
+.field { width: 70px; background: var(--bg); border: 1px solid var(--line-2); border-radius: 10px; padding: 6px 8px; font-variant-numeric: tabular-nums; }
 select.field { width: auto; }
-
 .scen { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.scen > div { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--bg); min-width: 0; }
-.scen .big { font-family: var(--f-display); font-size: 26px; margin-top: 4px; }
-.scen .hot-c { border-color: color-mix(in srgb, var(--hot) 55%, var(--line)); }
-.scen .cool-c { border-color: color-mix(in srgb, var(--cool) 55%, var(--line)); }
+.scen > div { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: var(--bg-2); min-width: 0; }
+.scen .big { font-family: var(--f-mono); font-weight: 700; font-size: 22px; margin-top: 4px; }
+.scen .hot-c { border-color: rgba(255,106,26,.5); } .scen .cool-c { border-color: rgba(69,200,255,.5); }
 @media (max-width: 480px) { .scen { grid-template-columns: 1fr; } }
-
 .wire-row { display: grid; grid-template-columns: 86px minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 0; border-bottom: 1px solid var(--line); align-items: center; }
 .wire-row .when { font-size: 13px; color: var(--muted); }
-.wire-row .when b { color: var(--fg); display: block; font-weight: 600; }
-.wire-row .what b { font-weight: 600; }
+.wire-row .when b { color: var(--fg); display: block; font-weight: 700; }
+.wire-row .what b { font-weight: 700; }
 .wire-row .moves { text-align: right; font-size: 13px; }
 button.wire-row { background: none; border: 0; border-bottom: 1px solid var(--line); width: 100%; text-align: left; border-radius: 0; }
 button.wire-row:hover { background: var(--surface-2); }
-
-.side { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 1px 8px; border-radius: 6px; margin-top: 2px; }
-.side.buy { background: var(--brass); color: var(--brass-ink); }
-.side.sell { background: var(--neg); color: #1a0d08; }
-.likely { border-radius: 12px; padding: 14px 16px; }
-.likely.buy { background: var(--brass); color: var(--brass-ink); }
-.likely.sell { background: var(--neg); color: #1a0d08; }
-.likely .order { font-family: var(--f-display); font-size: 36px; line-height: 1.1; margin: 2px 0 6px; }
-.chart svg { width: 100%; height: auto; display: block; }
+.likely { border-radius: 14px; padding: 14px 16px; }
+.likely.buy { background: var(--pos); color: #0d1a03; } .likely.sell { background: var(--neg); color: #22030a; }
+.likely .order { font-family: var(--f-display); font-size: 34px; font-weight: 800; line-height: 1.1; margin: 2px 0 6px; }
 .prose p + p { margin-top: 8px; }
-.note { font-size: 12.5px; color: var(--muted); }
-.btn { border: 1px solid var(--brass); background: var(--brass); color: var(--brass-ink); border-radius: 10px; padding: 9px 16px; font-weight: 600; }
-.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line); }
-.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; font-size: 14px; }
-.kv dt { color: var(--muted); } .kv dd { margin: 0; }
 .toggle { display: inline-flex; align-items: center; gap: 10px; }
-.toggle input { width: 20px; height: 20px; accent-color: var(--brass); }
-
-/* ---------- EaglePro shell ---------- */
-[hidden] { display: none !important; }
-body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
-.appbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
-.appbar .wrap { display: flex; align-items: center; gap: 10px; padding-block: 10px; }
-.logo { width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(140deg, var(--hero-a), var(--hero-b)); color: var(--gold); display: grid; place-items: center; flex: none; }
-.menubtn { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; width: 38px; height: 38px; display: grid; place-items: center; color: var(--fg); flex: none; }
-.scrim { position: fixed; inset: 0; z-index: 40; background: color-mix(in srgb, var(--bg) 70%, transparent); }
-.menu { position: fixed; z-index: 41; top: calc(env(safe-area-inset-top, 0px) + 58px); right: max(12px, env(safe-area-inset-right, 0px)); width: min(320px, calc(100vw - 24px)); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 8px; box-shadow: 0 24px 50px -20px #000; max-height: calc(100vh - 140px); overflow: auto; }
-.menu .who { padding: 10px 12px 12px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
-.menu .mi { display: flex; align-items: center; gap: 12px; width: 100%; background: none; border: 0; border-radius: 10px; padding: 11px 12px; text-align: left; font-size: 15px; }
-.menu .mi:hover, .menu .mi:focus-visible { background: var(--surface-2); }
-.menu .mi svg { width: 19px; height: 19px; color: var(--brass); flex: none; }
-.menu .mi.danger { color: var(--neg); } .menu .mi.danger svg { color: var(--neg); }
-.menu form { display: grid; gap: 8px; padding: 6px 12px 12px; }
-.menu input { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; }
-.symchips { display: flex; flex-wrap: wrap; gap: 6px; }
-.symchips span { background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 12.5px; }
-.appbar .name { font-family: var(--f-display); font-weight: 700; font-size: 18px; letter-spacing: -.01em; }
-.appbar .sp { flex: 1; }
-.sync { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-.sync i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); display: inline-block; }
-.sync.live i { background: var(--pos); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pos) 25%, transparent); }
-.sync.stale i { background: var(--neg); }
-.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
-.nav .in { max-width: 640px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
-.navbtn { background: none; border: 0; padding: 9px 4px 8px; display: grid; justify-items: center; gap: 3px; color: var(--muted); font-size: 11.5px; font-weight: 500; }
-.navbtn svg { width: 22px; height: 22px; }
-.navbtn[aria-current="page"] { color: var(--brass); }
-.sec { display: grid; gap: 16px; padding-block: 16px 28px; }
-.sec > * { min-width: 0; }
-@media (min-width: 900px) { .sec.two { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } .sec.two .full { grid-column: 1 / -1; } }
-.newsbar { display: flex; flex-wrap: wrap; gap: 8px; padding-block: 14px 0; }
-.layout { padding-block: 14px 28px; }
-.hero { background: linear-gradient(140deg, var(--hero-a), var(--hero-b)); border: 1px solid color-mix(in srgb, var(--violet) 45%, transparent); border-radius: 20px; padding: 18px; display: grid; gap: 14px; box-shadow: 0 14px 34px -18px var(--hero-b); }
-.hero .eyebrow, .hero .note { color: color-mix(in srgb, var(--fg) 78%, transparent); }
-.hero .trio { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.hero .trio > div { background: color-mix(in srgb, var(--bg) 34%, transparent); border-radius: 12px; padding: 9px 12px; min-width: 0; }
-.hero .trio .v { font-family: var(--f-display); font-weight: 600; font-size: 19px; overflow-wrap: anywhere; }
-.hero .pos, .hero .up { color: #7df0bb; } .hero .neg, .hero .down { color: #ffb0b8; }
-.hero .acct { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
-.hero .big { font-family: var(--f-display); font-weight: 700; font-size: clamp(32px, 9vw, 44px); line-height: 1.05; letter-spacing: -.02em; }
-.hero .delta { font-weight: 600; font-size: 15px; }
-.pos { color: var(--pos); } .neg { color: var(--neg); }
-.tiles { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-@media (min-width: 620px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.tile { background: linear-gradient(180deg, var(--surface-2), var(--surface)); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-width: 0; }
-.tile .v { font-family: var(--f-display); font-weight: 600; font-size: 22px; line-height: 1.15; margin-top: 4px; overflow-wrap: anywhere; }
-.tile .s { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-.seg button { background: none; border: 0; padding: 6px 12px; font-size: 13px; color: var(--muted); }
-.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); font-weight: 600; }
-.ea { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
-.ea:last-child { border-bottom: 0; }
-.ea .ic { width: 36px; height: 36px; border-radius: 10px; background: var(--surface-2); display: grid; place-items: center; color: var(--brass); flex: none; font-family: var(--f-display); font-weight: 700; }
-.ea .nm { font-weight: 600; overflow-wrap: anywhere; }
-.ea .rt { margin-left: auto; text-align: right; white-space: nowrap; }
-.barrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
-.barrow:last-child { border-bottom: 0; }
-.barrow .track { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
-.barrow .fill { height: 100%; border-radius: 3px; }
-.btn.wide { width: 100%; padding: 12px 16px; font-size: 15px; }
-.btn:disabled { opacity: .6; }
-.auth { min-height: 100%; display: grid; align-content: center; gap: 18px; max-width: 420px; margin: 0 auto; padding-block: 40px; }
-.auth h1 { font-size: 34px; font-weight: 700; }
-.auth form { display: grid; gap: 12px; }
-.auth label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
-.input { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 16px; color: var(--fg); }
-.err { color: var(--neg); font-size: 14px; }
-.okmsg { color: var(--pos); font-size: 14px; }
-.linkbtn { background: none; border: 0; color: var(--brass); padding: 0; font-weight: 600; }
-.steps { display: grid; gap: 10px; counter-reset: st; padding: 0; margin: 0; list-style: none; }
-.steps li { counter-increment: st; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: start; }
-.steps li::before { content: counter(st); width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); color: var(--brass); display: grid; place-items: center; font-weight: 700; font-size: 13px; }
-.story { display: grid; gap: 10px; }
-.story img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; background: var(--surface-2); }
-.story h3 { font-size: 20px; line-height: 1.25; }
-.story .meta { font-size: 12px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.story .src { color: var(--brass); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: 11px; }
-.story p { color: color-mix(in srgb, var(--fg) 88%, var(--muted)); }
-.story a { color: var(--brass); font-weight: 600; text-decoration: none; }
-.skel { border-radius: 14px; background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%); background-size: 200% 100%; animation: sk 1.2s linear infinite; }
-@keyframes sk { to { background-position: -200% 0; } }
-@media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
-.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px; z-index: 40; max-width: calc(100% - 32px); }
-.badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; background: var(--surface-2); color: var(--muted); }
-.badge.ready { background: color-mix(in srgb, var(--brass) 22%, transparent); color: var(--brass); }
-.badge.demo { background: color-mix(in srgb, var(--gold) 22%, transparent); color: var(--gold); }
+.toggle input { width: 20px; height: 20px; accent-color: var(--ember); }
 </style>
-
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+ <linearGradient id="de-steel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb15c"/><stop offset=".5" stop-color="#ff6a1a"/><stop offset="1" stop-color="#b8300a"/></linearGradient>
+ <linearGradient id="de-ember" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffcf8a"/><stop offset="1" stop-color="#ff5a12"/></linearGradient>
+ <radialGradient id="de-core"><stop offset="0" stop-color="#fff2d6"/><stop offset=".55" stop-color="#ffb347"/><stop offset="1" stop-color="#ff5a12"/></radialGradient>
+ <radialGradient id="de-heat"><stop offset="0" stop-color="#ff6a1a" stop-opacity=".55"/><stop offset=".6" stop-color="#ff6a1a" stop-opacity=".08"/><stop offset="1" stop-color="#ff6a1a" stop-opacity="0"/></radialGradient>
+ <radialGradient id="de-bg" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="#2a1206"/><stop offset=".55" stop-color="#110a07"/><stop offset="1" stop-color="#07080b"/></radialGradient>
+ <radialGradient id="de-glow"><stop offset="0" stop-color="#ff6a1a" stop-opacity=".35"/><stop offset="1" stop-color="#ff6a1a" stop-opacity="0"/></radialGradient>
+</defs></svg>
 <div id="auth" class="wrap" hidden></div>
 <div id="app" hidden>
-  </head>
-<body>
-<header class="appbar"><div class="wrap">
-    <span class="logo" aria-hidden="true"><svg viewBox="0 0 104 104" width="22" height="22" fill="currentColor" fill-rule="evenodd"><path d="M8 90 L15 72 L8 68 L19 56 L12 50 L25 39 C33 23 51 13 68 17 L80 22 C95 27 101 44 94 61 L88 52 C87 46 82 43 74 45 L67 53 C65 61 61 65 55 67 L59 75 L49 77 L53 87 L41 89 L43 97 L24 95 Z M55 31 L70 27 L65 35 Z"/></svg></span>
-    <span class="name">EaglePro</span><span class="sp"></span><span class="sync" id="sync"></span>
-    <button class="menubtn" id="btn-menu" aria-label="Menu" aria-haspopup="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <header class="topbar"><div class="wrap">
+    <span class="mark" aria-hidden="true"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M43.2,11.0 L45.0,4.3 L55.0,4.3 L56.8,11.0 L63.6,12.8 L68.5,7.9 L77.2,12.9 L75.4,19.7 L80.3,24.6 L87.1,22.8 L92.1,31.5 L87.2,36.4 L89.0,43.2 L95.7,45.0 L95.7,55.0 L89.0,56.8 L87.2,63.6 L92.1,68.5 L87.1,77.2 L80.3,75.4 L75.4,80.3 L77.2,87.1 L68.5,92.1 L63.6,87.2 L56.8,89.0 L55.0,95.7 L45.0,95.7 L43.2,89.0 L36.4,87.2 L31.5,92.1 L22.8,87.1 L24.6,80.3 L19.7,75.4 L12.9,77.2 L7.9,68.5 L12.8,63.6 L11.0,56.8 L4.3,55.0 L4.3,45.0 L11.0,43.2 L12.8,36.4 L7.9,31.5 L12.9,22.8 L19.7,24.6 L24.6,19.7 L22.8,12.9 L31.5,7.9 L36.4,12.8 Z" fill="url(#de-steel)"/><circle cx="50" cy="50" r="32.2" fill="#0b0c10"/><circle cx="50" cy="50" r="32.2" fill="url(#de-heat)"/><path d="M59.2,49.1 Q68.9,50.4 76.8,59.8 L70.9,69.4 Q64.4,62.1 58.4,53.8 Z M55.4,57.5 Q59.1,66.5 54.9,78.1 L43.6,77.8 Q46.7,68.6 51.0,59.2 Z M46.2,58.4 Q40.2,66.1 28.1,68.3 L22.7,58.4 Q32.3,56.4 42.6,55.4 Z M40.8,50.9 Q31.1,49.6 23.2,40.2 L29.1,30.6 Q35.6,37.9 41.6,46.2 Z M44.6,42.5 Q40.9,33.5 45.1,21.9 L56.4,22.2 Q53.3,31.4 49.0,40.8 Z M53.8,41.6 Q59.8,33.9 71.9,31.7 L77.3,41.6 Q67.7,43.6 57.4,44.6 Z" fill="url(#de-ember)"/><circle cx="50" cy="50" r="9.2" fill="url(#de-core)"/><circle cx="50" cy="50" r="3.9" fill="#fff4e0"/></svg></span>
+    <span class="word">DARK<b>ENGINE</b></span>
+    <span class="sp"></span>
+    <span class="sync" id="sync"></span>
+    <button class="iconbtn" id="btn-bell" aria-label="Notification settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="dot" id="belldot" hidden></span></button>
+    <button class="iconbtn" id="btn-menu" aria-label="Menu" aria-haspopup="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
   </div></header>
-  <section id="sec-perf" class="wrap sec two" hidden></section>
+  <section id="sec-engine" class="wrap sec two" hidden></section>
+  <section id="sec-trades" class="wrap sec" hidden></section>
   <section id="sec-news" hidden>
-    <div class="wrap newsbar clockrow" id="clock"></div>
+    <div class="wrap" id="eanews" style="padding-top:8px"></div>
+    <div class="wrap clockrow" id="clock" style="padding-top:14px"></div>
     <div class="wrap layout">
       <aside class="rail">
-        <div><div class="eyebrow" style="margin-bottom:8px">Release</div><div class="chips" id="fams" role="group" aria-label="Release"></div></div>
+        <div><div class="eyebrow" style="margin-bottom:8px">US release</div><div class="chips" id="fams" role="group" aria-label="Release"></div></div>
         <div><div class="eyebrow" style="margin-bottom:8px">Instrument</div><div class="chips" id="pairs" role="group" aria-label="Instrument"></div></div>
       </aside>
       <main>
@@ -237,13 +282,13 @@ body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
     </div>
   </section>
   <section id="sec-world" class="wrap sec" hidden></section>
-  <section id="sec-account" class="wrap sec two" hidden></section>
-  <nav class="nav" aria-label="Sections"><div class="in">
-    <button class="navbtn" data-sec="perf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Performance</button>
-    <button class="navbtn" data-sec="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>News</button>
-    <button class="navbtn" data-sec="world"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.500 0 18M12 3c-3 3.5-3 14.500 0 18"/></svg>World</button>
-    <button class="navbtn" data-sec="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.500-4 5-6 8-6s6.500 2 8 6"/></svg>Account</button>
-  </div></nav>
+  <section id="sec-settings" class="wrap sec two" hidden></section>
+  <nav class="dock" aria-label="Sections">
+    <button class="dockbtn" data-sec="engine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.6"/></svg>Engine</button>
+    <button class="dockbtn" data-sec="trades"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 4l-3 3M7 4l3 3M17 20V4M17 20l-3-3M17 20l3-3"/></svg>Trades</button>
+    <button class="dockbtn" data-sec="news"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>News</button>
+    <button class="dockbtn" data-sec="world"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></svg>World</button>
+  </nav>
 </div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="menu" id="menu" hidden></div>
@@ -281,14 +326,14 @@ const KNOWN = {
 
 /* ---------- storage ---------- */
 const store = {
-  get(k, d) { try { const v = localStorage.getItem("pw:" + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem("pw:" + k, JSON.stringify(v)); } catch (e) {} },
+  get(k, d) { try { const v = localStorage.getItem("de:" + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("de:" + k, JSON.stringify(v)); } catch (e) {} },
 };
 const S = {
   fam: store.get("fam", "cpi"),
   pair: store.get("pair", "XAUUSD"),
   tab: (t => t === "setup" ? "wire" : t)(store.get("tab", "wire")),
-  sec: store.get("sec", "perf"),
+  sec: (s => ["engine", "trades", "news", "world", "settings"].includes(s) ? s : "engine")(store.get("sec", "engine")),
   pick: null,
   stance: store.get("stance", {}),
   edits: store.get("edits", {}),
@@ -637,7 +682,7 @@ function viewWire() {
 
 function lineChart(series, marks, opt) {
   if (series.length < 2) return `<p class="muted">${esc(opt.empty || "No data yet.")}</p>`;
-  const Wd = Math.round(Math.max(320, Math.min(760, (document.getElementById(S.sec === "news" ? "view" : "sec-perf").clientWidth || 760) - 34))), Ht = Math.round(Wd < 500 ? 230 : 260), L = 50, R = 12, T = 12, B = 28;
+  const Wd = Math.round(Math.max(320, Math.min(760, (document.getElementById(S.sec === "news" ? "view" : "sec-" + S.sec).clientWidth || 760) - 34))), Ht = Math.round(Wd < 500 ? 230 : 260), L = 50, R = 12, T = 12, B = 28;
   const xs = series.map(s => Date.parse(s[0])), ys = series.map(s => s[1]);
   const x0 = Math.min(...xs), x1 = Math.max(...xs); let y0 = Math.min(...ys), y1 = Math.max(...ys); const pad = (y1 - y0) * 0.08 || 1; y0 -= pad; y1 += pad;
   const X = t => L + (t - x0) / (x1 - x0) * (Wd - L - R), Y = v => T + (1 - (v - y0) / (y1 - y0)) * (Ht - T - B);
@@ -671,7 +716,7 @@ function viewSeries() {
   return `<div class="card chart"><h3>Dollar basket</h3><p class="note" style="margin:4px 0 8px">Geometric basket of EUR, JPY, GBP, CAD and CHF per dollar, ECB daily fix. Clay dots mark ${esc(f.short)} sessions.</p>
       ${lineChart(usdSeries, rx.map(o => o.x.to), { id: "usd", title: "Dollar basket", color: "var(--brass)", dot: "var(--hot)", fmt: v => v.toFixed(1) })}</div>
     <div class="card chart"><h3>Gold, XAU/USD</h3><p class="note" style="margin:4px 0 8px">Daily close in dollars per ounce. Dots mark ${esc(f.short)} sessions.</p>
-      ${lineChart(goldSeries, rx.filter(o => o.x.gold).map(o => o.x.gold.to), { id: "xau", title: "Gold price", color: "#e8c46a", dot: "var(--hot)", fmt: v => "$" + Math.round(v).toLocaleString("en-US"), empty: "Gold history loads when the app is online. Tap Refresh in Setup." })}</div>
+      ${lineChart(goldSeries, rx.filter(o => o.x.gold).map(o => o.x.gold.to), { id: "xau", title: "Gold price", color: "var(--ember-2)", dot: "var(--hot)", fmt: v => "$" + Math.round(v).toLocaleString("en-US"), empty: "Gold history loads when the app is online. Tap Refresh in Setup." })}</div>
     <div class="card"><h3>${esc(f.short)} sessions</h3><div class="tbl" style="margin-top:8px"><table><thead><tr><th>Date</th><th>Covers</th><th>Label</th><th class="r">Dollar</th><th class="r">Gold</th></tr></thead><tbody>${rows || `<tr><td colspan="5" class="muted">No measured sessions yet.</td></tr>`}</tbody></table></div></div>`;
 }
 function dataCards() {
@@ -700,28 +745,51 @@ function renderNews() {
   if (keep) { const el = document.getElementById(keep.id); if (el) { el.focus(); try { el.setSelectionRange(keep.s, keep.s); } catch (e) {} } }
 }
 
+
 /* =====================================================================
-   EaglePro: accounts, EA performance, PDF report, world news
+   DarkEngine: accounts, period results, trades, notifications, PDF, world news
    ===================================================================== */
-// Firebase project of the app. The EagleVision PRO V2.0 EA writes to the same database.
+// Firebase project of the app. The DarkEngine V2.0 EA writes to the same database.
 const FB = { apiKey: "AIzaSyBUsA_mZf0_wMqrL0sOzPrc5mhH4EksD90", project: "eagletracker-ca2ff", db: "https://firestore.googleapis.com" };
 const FB_READY = /^AIza/.test(FB.apiKey) && /^https:\/\//.test(FB.db);
+const EA = "DarkEngine V2.0";
+const APP_VER = "4.0";
+const MARK = document.querySelector(".mark") ? document.querySelector(".mark").innerHTML : "";
 const $ = id => document.getElementById(id);
 const A = {
   user: store.get("auth", null), mode: "in", err: "", ok: "", busy: false, form: { email: "", pass: "" },
   accounts: null, sel: store.get("acct", null), range: store.get("range", 30), loadErr: "", sample: false,
+  tview: store.get("tview", "open"),
   world: store.get("world", { cat: "world", items: {}, t: {} }), worldBusy: false, worldErr: "", pdfBusy: false,
 };
 const money = (v, cur) => (v < 0 ? "−" : "") + Math.abs(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + (cur ? " " + cur : "");
 const signed = v => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const pc = v => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(2) + "%";
 const pn = v => v > 0 ? "pos" : v < 0 ? "neg" : "";
-function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 3200); }
+function toast(msg, kind) { const t = $("toast"); t.textContent = msg; t.className = "toast" + (kind ? " " + kind : ""); t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, kind ? 5200 : 3200); }
 function ago(ms) { const s = Math.max(0, Math.round((Date.now() - ms) / 1000)); if (s < 90) return s + "s ago"; if (s < 5400) return Math.round(s / 60) + " min ago"; if (s < 172800) return Math.round(s / 3600) + "h ago"; return Math.round(s / 86400) + " days ago"; }
+function left(ms) { const m = Math.max(0, Math.round(ms / 60000)); if (m < 60) return m + " min"; const h = Math.floor(m / 60); if (h < 48) return h + "h " + (m % 60) + "m"; return Math.floor(h / 24) + "d " + (h % 24) + "h"; }
+
+/* ---------- East Africa Time helpers (the EA sends tz and close hour) ---------- */
+const tzOf = acc => acc && acc.pnl && Number.isFinite(+acc.pnl.tz) ? +acc.pnl.tz : 3;
+const tzLbl = tz => tz === 3 ? "EAT" : "UTC" + (tz >= 0 ? "+" : "−") + Math.abs(tz);
+function inTz(sec, tz, o) { return new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", ...o }).format(new Date((sec + tz * 3600) * 1000)); }
+const tzTime = (sec, tz) => inTz(sec, tz, { hour: "2-digit", minute: "2-digit", hour12: false });
+const tzDay = (sec, tz) => inTz(sec, tz, { weekday: "short", day: "numeric", month: "short" });
+const tzStamp = (sec, tz) => inTz(sec, tz, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
+const keyDate = k => new Date(k + "T00:00:00Z");
+const dayName = k => keyDate(k).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+function weekName(k) {
+  const a = keyDate(k), b = new Date(a.getTime() + 6 * 86400000), o = { day: "numeric", timeZone: "UTC" }, m = { day: "numeric", month: "short", timeZone: "UTC" };
+  return a.getUTCMonth() === b.getUTCMonth() ? `${a.toLocaleDateString("en-GB", o)} – ${b.toLocaleDateString("en-GB", m)}` : `${a.toLocaleDateString("en-GB", m)} – ${b.toLocaleDateString("en-GB", m)}`;
+}
+const monthName = k => keyDate(k + "-01").toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
+// business day: a day closes at closeHour local time, so 23:30 EAT already counts for the next day
+const bizKey = (ms, tz, ch) => new Date(ms + (tz + 24 - ch) * 3600000).toISOString().slice(0, 10);
 
 /* ---------- auth (Firebase REST) ---------- */
 const AUTH_ERR = {
-  CREDENTIAL_TOO_OLD_LOGIN_AGAIN: "For safety, sign out, sign in again, then change the password.", TOKEN_EXPIRED: "Your session expired. Sign out and sign in again.", WEAK_PASSWORD: "Use at least 6 characters.",
+  CREDENTIAL_TOO_OLD_LOGIN_AGAIN: "For safety, sign out, sign in again, then change the password.", TOKEN_EXPIRED: "Your session expired. Sign out and sign in again.",
   EMAIL_EXISTS: "That email already has an account. Sign in instead.",
   EMAIL_NOT_FOUND: "Wrong email or password.", INVALID_PASSWORD: "Wrong email or password.", INVALID_LOGIN_CREDENTIALS: "Wrong email or password.",
   INVALID_EMAIL: "That email address does not look right.", MISSING_PASSWORD: "Type your password.",
@@ -743,7 +811,7 @@ async function token() {
   A.user.idToken = j.id_token; A.user.refreshToken = j.refresh_token; A.user.exp = Date.now() + (Number(j.expires_in || 3600) - 90) * 1000; store.set("auth", A.user);
   return A.user.idToken;
 }
-function signOut() { A.user = null; A.accounts = null; A.sample = false; store.set("auth", null); render(); }
+function signOut() { A.user = null; A.accounts = null; A.sample = false; A.sig = ""; store.set("auth", null); runner("clearAuth"); render(); }
 async function submitAuth() {
   if (A.busy) return;
   const email = A.form.email.trim(), pass = A.form.pass;
@@ -754,16 +822,17 @@ async function submitAuth() {
   A.busy = true; render();
   try {
     if (A.mode === "reset") { await fbAuth("sendOobCode", { requestType: "PASSWORD_RESET", email }); A.ok = "Reset link sent. Check your email, then sign in."; A.mode = "in"; }
-    else { setUser(await fbAuth(A.mode === "up" ? "signUp" : "signInWithPassword", { email, password: pass, returnSecureToken: true })); A.form.pass = ""; A.accounts = null; loadAccounts(); }
+    else { setUser(await fbAuth(A.mode === "up" ? "signUp" : "signInWithPassword", { email, password: pass, returnSecureToken: true })); A.form.pass = ""; A.accounts = null; loadAccounts(); initNotif(true); }
   } catch (e) { A.err = e.message; }
   A.busy = false; render();
 }
 function renderAuth() {
   const up = A.mode === "up", reset = A.mode === "reset";
   $("auth").innerHTML = `<div class="auth">
-    <div class="row"><span class="logo" aria-hidden="true"><svg viewBox="0 0 104 104" width="22" height="22" fill="currentColor" fill-rule="evenodd"><path d="M8 90 L15 72 L8 68 L19 56 L12 50 L25 39 C33 23 51 13 68 17 L80 22 C95 27 101 44 94 61 L88 52 C87 46 82 43 74 45 L67 53 C65 61 61 65 55 67 L59 75 L49 77 L53 87 L41 89 L43 97 L24 95 Z M55 31 L70 27 L65 35 Z"/></svg></span><span style="font-family:var(--f-display);font-weight:700;font-size:20px">EaglePro</span></div>
-    <div><h1>${up ? "Create your account" : reset ? "Reset your password" : "Welcome back"}</h1>
-      <p class="muted" style="margin-top:6px">${up ? "Track every EA on your MT5 accounts, with daily results, news reads and reports." : reset ? "We will email you a link to choose a new password." : "Sign in to see how your EAs are doing."}</p></div>
+    <div class="hero-mark" aria-hidden="true">${MARK}</div>
+    <div><div class="word" style="font-size:15px;margin-bottom:10px">DARK<b>ENGINE</b></div>
+      <h1>${up ? "Start your engine" : reset ? "Reset your password" : "Welcome back"}</h1>
+      <p class="muted" style="margin-top:8px">${up ? "Watch DarkEngine V2.0 trade your MT5 accounts: day, week and month results, every trade, and alerts on your phone." : reset ? "We will email you a link to choose a new password." : "Sign in to see what your engine is doing."}</p></div>
     <form id="authform" novalidate>
       <label for="au-email">Email<input class="input" id="au-email" type="email" autocomplete="email" inputmode="email" value="${esc(A.form.email)}" placeholder="you@example.com"></label>
       ${reset ? "" : `<label for="au-pass">Password<input class="input" id="au-pass" type="password" autocomplete="${up ? "new-password" : "current-password"}" value="${esc(A.form.pass)}" placeholder="At least 6 characters"></label>`}
@@ -774,8 +843,90 @@ function renderAuth() {
       <button class="linkbtn" data-mode="${up || reset ? "in" : "up"}">${up || reset ? "I have an account" : "Create an account"}</button>
       ${reset || up ? "" : `<button class="linkbtn" data-mode="reset">Forgot password?</button>`}
     </div>
-    ${FB_READY ? "" : `<div class="card" style="display:grid;gap:8px"><span class="badge demo">Setup pending</span><p class="note">Accounts switch on once the app is connected to its database. Until then you can look around with sample numbers.</p><button class="btn ghost" id="btn-sample">Preview with sample data</button></div>`}
+    <button class="btn ghost" id="btn-sample">Look around with sample data</button>
   </div>`;
+}
+
+/* ---------- notifications: in-app + Android system tray ---------- */
+const RUNNER = "com.darkengine.app.check";
+const NOTIF = { prefs: Object.assign({ trades: true, news: true, lead: 15 }, store.get("notif", {})), perm: "unknown", seen: new Set(store.get("seen", [])), exact: null };
+const isNative = () => { const c = window.Capacitor; return !!(c && c.isNativePlatform && c.isNativePlatform()); };
+function nat(plugin, method, opts) { const c = window.Capacitor; return c.nativePromise ? c.nativePromise(plugin, method, opts || {}) : c.Plugins[plugin][method](opts || {}); }
+// same hash as runners/background.js, so the app and the background check never post the same alert twice
+function hid(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return (h % 2000000000) + 1; }
+function runner(event, details) { if (!isNative()) return Promise.resolve(null); return nat("BackgroundRunner", "dispatchEvent", { label: RUNNER, event, details: details || {} }).catch(() => null); }
+function saveSeen() { const a = [...NOTIF.seen]; store.set("seen", a.slice(-600)); }
+async function initNotif(ask) {
+  if (!isNative()) { NOTIF.perm = "web"; return; }
+  try { await nat("LocalNotifications", "createChannel", { id: "de_alerts", name: "DarkEngine alerts", description: "New trades opened by DarkEngine and upcoming news", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#FF6A1A" }); } catch (e) {}
+  try { NOTIF.perm = (await nat("LocalNotifications", "checkPermissions")).display; } catch (e) { NOTIF.perm = "unavailable"; }
+  if (ask && /prompt/.test(NOTIF.perm) && !store.get("asked", false)) { store.set("asked", true); await askPermission(); }
+  try { NOTIF.exact = (await nat("LocalNotifications", "checkExactNotificationSetting")).exact_alarm; } catch (e) {}
+  const st = await runner("getState");
+  if (st && Array.isArray(st.seen)) { st.seen.forEach(x => NOTIF.seen.add(+x)); saveSeen(); }
+  pushAuth();
+  renderBell();
+}
+async function askPermission() {
+  if (!isNative()) { toast("Alerts work in the Android app."); return; }
+  try { NOTIF.perm = (await nat("LocalNotifications", "requestPermissions")).display; } catch (e) {}
+  renderBell(); if (S.sec === "settings") render();
+}
+function pushAuth() {
+  if (!A.user || A.sample) return runner("clearAuth");
+  return runner("saveAuth", { apiKey: FB.apiKey, project: FB.project, uid: A.user.uid, refreshToken: A.user.refreshToken, prefs: NOTIF.prefs });
+}
+function renderBell() { const d = $("belldot"); if (d) d.hidden = !(isNative() && NOTIF.perm !== "granted"); }
+async function postNow(list) {
+  if (!list.length || !isNative() || NOTIF.perm !== "granted") return;
+  try { await nat("LocalNotifications", "schedule", { notifications: list.map(n => ({ ...n, channelId: "de_alerts", smallIcon: "ic_stat_de", iconColor: "#FF6A1A", autoCancel: true })) }); } catch (e) {}
+}
+function tradeText(p, acc) {
+  const dg = String(p.open).split(".")[1], d = dg ? dg.length : 2, f = v => v ? (+v).toFixed(d) : "none";
+  return { title: `DarkEngine ${p.side === "buy" ? "BUY" : "SELL"} ${p.sym}`, body: `${(+p.vol).toFixed(2)} lots at ${f(p.open)} · SL ${f(p.sl)} · TP ${f(p.tp)}`, largeBody: `${(+p.vol).toFixed(2)} lots at ${f(p.open)}\nStop loss ${f(p.sl)} · Take profit ${f(p.tp)}\n${p.strat ? "Signal: " + p.strat + "\n" : ""}Account ${acc.login}` };
+}
+async function processAlerts(accs) {
+  if (A.sample) return;
+  const now = Date.now(), first = !store.get("alertsInit", false), post = [], later = [], marked = [], fresh = [];
+  const done = new Set();
+  for (const acc of Object.values(accs)) {
+    for (const p of acc.positions || []) {
+      if (p.id == null) continue;
+      const id = hid("pos:" + acc.login + ":" + p.id);
+      if (NOTIF.seen.has(id)) continue;
+      NOTIF.seen.add(id); marked.push(id);
+      if (!first && p.t && now - p.t * 1000 < 6 * 3600000) { fresh.push(p); if (NOTIF.prefs.trades) post.push({ id, ...tradeText(p, acc), extra: { kind: "trade" } }); }
+    }
+    if (!NOTIF.prefs.news) continue;
+    for (const n of acc.news || []) {
+      const id = hid("news:" + n.t + ":" + n.cur + ":" + n.name), at = n.t * 1000 - NOTIF.prefs.lead * 60000;
+      if (done.has(id) || n.t * 1000 <= now) continue; done.add(id);
+      const txt = { title: `${n.cur} news in ${at > now ? NOTIF.prefs.lead + " min" : left(n.t * 1000 - now)}`, body: `${n.name} at ${tzTime(n.t, tzOf(acc))} ${tzLbl(tzOf(acc))}. DarkEngine pauses new ${n.cur} trades around it.`, extra: { kind: "news" } };
+      if (at > now) { later.push({ id, ...txt, schedule: { at: new Date(at).toISOString(), allowWhileIdle: true } }); if (!NOTIF.seen.has(id)) { NOTIF.seen.add(id); marked.push(id); } }
+      else if (!NOTIF.seen.has(id)) { NOTIF.seen.add(id); marked.push(id); post.push({ id, ...txt }); }
+    }
+  }
+  store.set("alertsInit", true);
+  if (fresh.length) toast(fresh.length === 1 ? `New trade: ${fresh[0].side.toUpperCase()} ${fresh[0].sym} ${(+fresh[0].vol).toFixed(2)}` : `${fresh.length} new trades opened`, "trade");
+  if (marked.length) { saveSeen(); runner("markSeen", { ids: marked }); }
+  await postNow(post);
+  if (later.length && isNative() && NOTIF.perm === "granted") { try { await nat("LocalNotifications", "schedule", { notifications: later.map(n => ({ ...n, channelId: "de_alerts", smallIcon: "ic_stat_de", iconColor: "#FF6A1A", autoCancel: true })) }); } catch (e) {} }
+}
+async function cancelNews() {
+  if (!isNative()) return;
+  try { const p = await nat("LocalNotifications", "getPending"); const ids = (p.notifications || []).filter(n => n.extra && n.extra.kind === "news").map(n => ({ id: n.id })); if (ids.length) await nat("LocalNotifications", "cancel", { notifications: ids }); } catch (e) {}
+}
+async function setPref(k, v) {
+  NOTIF.prefs[k] = v; store.set("notif", NOTIF.prefs); pushAuth();
+  if (k === "news" || k === "lead") { await cancelNews(); if (A.accounts && NOTIF.prefs.news) { const keep = NOTIF.seen; for (const acc of Object.values(A.accounts)) for (const n of acc.news || []) keep.delete(hid("news:" + n.t + ":" + n.cur + ":" + n.name)); processAlerts(A.accounts); } }
+  render();
+}
+async function testAlert() {
+  if (!isNative()) { toast("Test alerts work in the Android app."); return; }
+  if (NOTIF.perm !== "granted") await askPermission();
+  if (NOTIF.perm !== "granted") { toast("Alerts are blocked. Allow them in Android settings."); return; }
+  await postNow([{ id: 7, title: "DarkEngine BUY XAUUSD", body: "Test alert: this is how a new trade shows on your phone." }]);
+  toast("Test alert sent");
 }
 
 /* ---------- account data ---------- */
@@ -783,33 +934,52 @@ async function loadAccounts() {
   if (!A.user || A.sample) return;
   try {
     const t = await token();
-    const r = await fetch(`https://firestore.googleapis.com/v1/projects/${FB.project}/databases/(default)/documents/users/${A.user.uid}/accounts?pageSize=50`, { headers: { Authorization: "Bearer " + t } });
+    const r = await fetch(`${FB.db}/v1/projects/${FB.project}/databases/(default)/documents/users/${A.user.uid}/accounts?pageSize=50`, { headers: { Authorization: "Bearer " + t } });
     if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? "The database refused the request. Sign out and in again." : "Could not load your accounts.");
     const j = (await r.json()) || {}, out = {};
     for (const d of j.documents || []) { try { const v = JSON.parse(d.fields.json.stringValue); out[String(v.login || d.name.split("/").pop())] = v; } catch (e) {} }
     const sig = JSON.stringify(out);
-    if (sig === A.sig && A.accounts) { A.loadErr = ""; if (S.sec === "perf") renderSync(currentAcct()); return; }
+    if (sig === A.sig && A.accounts) { A.loadErr = ""; if (S.sec === "engine" || S.sec === "trades") renderSync(currentAcct()); return; }
     A.sig = sig; A.accounts = out; A.loadErr = "";
-  } catch (e) { A.loadErr = e.message || "Could not load your accounts. Check your internet."; if (!A.accounts) A.accounts = null; }
-  if (A.user && S.sec !== "news" && S.sec !== "world") render();
+    processAlerts(out);
+  } catch (e) { A.loadErr = e.message || "Could not load your accounts. Check your internet."; }
+  if (A.user && S.sec !== "world" && !(S.sec === "news" && document.activeElement && document.activeElement.matches("input,select"))) render();
 }
 function sampleAccounts() {
-  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const days = {}; let bal = 5000; const today = new Date(); const names = ["EagleVision PRO V2.0", "Manual / no magic", "Magic 20260914"];
-  const agg = names.map((n, i) => ({ magic: [20261013, 0, 20260914][i], name: n, pl: 0, n: 0, w: 0 }));
-  const deals = [];
-  for (let i = 44; i >= 0; i--) {
-    const d = new Date(today.getTime() - i * 86400000); if (d.getUTCDay() === 0 || d.getUTCDay() === 6) continue;
-    const key = d.toISOString().slice(0, 10), n = 2 + Math.floor(rnd() * 6); let pl = 0, w = 0;
-    for (let k = 0; k < n; k++) { const x = (rnd() - 0.42) * 90; pl += x; if (x >= 0) w++; const e = agg[rnd() < 0.7 ? 0 : rnd() < 0.5 ? 1 : 2]; e.pl += x; e.n++; if (x >= 0) e.w++; deals.push({ t: Math.floor(d.getTime() / 1000) + k * 3000, sym: rnd() < 0.7 ? "XAUUSD" : "EURUSD", side: rnd() < 0.5 ? "buy" : "sell", vol: 0.1, pl: +x.toFixed(2), ea: e.name }); }
-    days[key] = { pl: +pl.toFixed(2), pct: +(pl / bal * 100).toFixed(2), start: +bal.toFixed(2), end: +(bal + pl).toFixed(2), dep: 0, n, w }; bal += pl;
+  let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const tz = 3, ch = 23, now = Date.now(), nowS = Math.floor(now / 1000), days = {}, deals = [];
+  const syms = ["XAUUSD", "EURUSD", "Volatility 75 Index", "GBPUSD", "Step Index", "BTCUSD"], strats = ["Spring H1", "SOS M15", "UTAD H4", "LPS H1", "SOW M30"], hows = ["tp", "tp", "sl", "tp", "sl", "ea", "manual"];
+  let bal = 5000, eaN = 0, eaW = 0, eaPL = 0;
+  for (let i = 40; i >= 0; i--) {
+    const key = bizKey(now - i * 86400000, tz, ch), wd = keyDate(key).getUTCDay();
+    if (wd === 0 || wd === 6) continue;
+    const n = 1 + Math.floor(rnd() * 4); let pl = 0, w = 0;
+    for (let k = 0; k < n; k++) {
+      const how = hows[Math.floor(rnd() * hows.length)], x = how === "tp" ? 40 + rnd() * 110 : how === "sl" ? -(30 + rnd() * 60) : (rnd() - 0.4) * 60;
+      pl += x; if (x >= 0) w++;
+      deals.push({ t: Math.floor(keyDate(key).getTime() / 1000) - 10 * 3600 + k * 7000, id: 900000 + deals.length, sym: syms[Math.floor(rnd() * syms.length)], side: rnd() < 0.5 ? "buy" : "sell", vol: 0.1, pl: +x.toFixed(2), price: 0, strat: strats[Math.floor(rnd() * strats.length)], how, ea: EA });
+    }
+    days[key] = { pl: +pl.toFixed(2), pct: +(pl / bal * 100).toFixed(2), start: +bal.toFixed(2), end: +(bal + pl).toFixed(2), dep: 0, n, w };
+    bal += pl; eaPL += pl; eaN += n; eaW += w;
   }
-  return { "52001234": { login: 52001234, server: "Exness-MT5Real8", broker: "Exness Technologies Ltd", name: "Sample account", currency: "USD", leverage: 500, demo: false,
-    balance: +bal.toFixed(2), equity: +(bal + 38.4).toFixed(2), margin: 121.5, floating: 38.4, updated: Math.floor(Date.now() / 1000) - 25, today: Object.keys(days).pop(),
-    charts: [{ name: "EagleVision PRO V2.0", sym: "XAUUSD", tf: "H1" }], scan: ["XAUUSD", "BTCUSD", "Volatility 75 Index", "Volatility 10 Index", "Step Index", "EURUSD"], window: 90,
-    eas: agg.map(e => ({ ...e, pl: +e.pl.toFixed(2) })), days,
-    positions: [{ sym: "XAUUSD", side: "buy", vol: 0.1, open: 4008.35, pl: 26.1, ea: "EagleVision PRO V2.0" }, { sym: "XAUUSD", side: "buy", vol: 0.1, open: 4010.1, pl: 12.3, ea: "EagleVision PRO V2.0" }],
-    deals: deals.slice(-40).reverse() } };
+  const sum = keys => keys.reduce((a, k) => { const d = days[k]; if (d) { a.pl += d.pl; a.n += d.n; a.w += d.w; } return a; }, { pl: 0, n: 0, w: 0 });
+  const today = bizKey(now, tz, ch), prev = bizKey(now - 86400000, tz, ch), closeOf = k => Math.floor(keyDate(k).getTime() / 1000) + (ch - tz) * 3600;
+  const mon = k => { const d = keyDate(k), wd = (d.getUTCDay() + 6) % 7; return new Date(d.getTime() - wd * 86400000).toISOString().slice(0, 10); };
+  const wk = mon(today), pwk = mon(new Date(keyDate(wk).getTime() - 86400000).toISOString().slice(0, 10)), mo = today.slice(0, 7);
+  const pmo = new Date(Date.UTC(+mo.slice(0, 4), +mo.slice(5) - 2, 1)).toISOString().slice(0, 7);
+  const ks = Object.keys(days), per = (key, keys, close, done) => { const s = sum(keys); return { key, pl: +s.pl.toFixed(2), n: s.n, w: s.w, close, done }; };
+  const mClose = m => Date.UTC(+m.slice(0, 4), +m.slice(5), 0, ch - tz) / 1000;
+  const pnl = { tz, closeHour: ch, since: nowS - 40 * 86400,
+    day: per(today, [today], closeOf(today), false), prevDay: per(prev, [prev], closeOf(prev), true),
+    week: per(wk, ks.filter(k => mon(k) === wk), closeOf(wk) + 6 * 86400, false), prevWeek: per(pwk, ks.filter(k => mon(k) === pwk), closeOf(pwk) + 6 * 86400, true),
+    month: per(mo, ks.filter(k => k.startsWith(mo)), mClose(mo), false), prevMonth: per(pmo, ks.filter(k => k.startsWith(pmo)), mClose(pmo), true) };
+  const news = [[95, "USD", "Initial Jobless Claims", 3], [260, "EUR", "ECB President Speech", 3], [610, "USD", "FOMC Meeting Minutes", 3], [1300, "GBP", "BoE Rate Statement", 3]].map(([m, cur, name, imp]) => ({ t: nowS + m * 60, cur, name, imp }));
+  return { "52001234": { v: 2, login: 52001234, server: "Exness-MT5Real8", broker: "Exness Technologies Ltd", name: "Sample account", currency: "USD", leverage: 500, demo: false,
+    balance: +bal.toFixed(2), equity: +(bal + 61.2).toFixed(2), margin: 121.5, floating: 61.2, updated: nowS - 25, today,
+    charts: [{ name: EA, sym: "XAUUSD", tf: "H1" }], scan: syms, window: 100, newsFilter: true, newsPause: "",
+    eas: [{ magic: 20261013, name: EA, pl: +eaPL.toFixed(2), n: eaN, w: eaW }], pnl, days,
+    positions: [{ id: 880001, t: nowS - 3400, sym: "XAUUSD", side: "buy", vol: 0.1, open: 4008.35, sl: 3991.2, tp: 4042.8, pl: 48.9, strat: "Spring H1", ea: EA }, { id: 880002, t: nowS - 900, sym: "Volatility 75 Index", side: "sell", vol: 0.005, open: 38712.44, sl: 39120.1, tp: 37901.6, pl: 12.3, strat: "UTAD H4", ea: EA }],
+    deals: deals.slice(-60).reverse(), news } };
 }
 function currentAcct() {
   const ids = Object.keys(A.accounts || {}); if (!ids.length) return null;
@@ -830,91 +1000,165 @@ function summary(acc, range) {
   return { ds, pl, n, w, growth, best, worst, green, traded, win: n ? w / n * 100 : 0 };
 }
 
-/* ---------- performance charts ---------- */
+/* ---------- charts ---------- */
 function barsChart(ds) {
   if (!ds.length) return `<p class="muted">No closed trades in this period yet.</p>`;
-  const Wd = Math.round(Math.max(300, Math.min(760, ($("sec-perf").clientWidth || 760) - 34))), Ht = 200, L = 46, R = 8, T = 10, B = 24;
+  const Wd = Math.round(Math.max(300, Math.min(760, ($("sec-" + S.sec).clientWidth || 760) - 34))), Ht = 200, L = 46, R = 8, T = 10, B = 24;
   const mx = Math.max(1, ...ds.map(x => Math.abs(x.pl))), has = ds.some(x => x.pl < 0), hasP = ds.some(x => x.pl > 0);
   const top = hasP ? mx : 0, bot = has ? -mx : 0, Y = v => T + (top - v) / (top - bot || 1) * (Ht - T - B);
   const bw = (Wd - L - R) / ds.length, gap = Math.min(4, bw * 0.25);
   const ticks = [top, (top + bot) / 2, bot].filter((v, i, a) => a.indexOf(v) === i);
   const every = Math.ceil(ds.length / (Wd < 500 ? 5 : 9));
   return `<svg viewBox="0 0 ${Wd} ${Ht}" role="img" aria-label="Daily profit and loss">
-    ${ticks.map(v => `<line x1="${L}" x2="${Wd - R}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="var(--line)" stroke-width="1"/><text x="${L - 6}" y="${(Y(v) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--muted)">${Math.round(v)}</text>`).join("")}
-    ${ds.map((x, i) => { const y0 = Y(0), y1 = Y(x.pl), h = Math.max(1.5, Math.abs(y1 - y0)); return `<rect x="${(L + i * bw + gap / 2).toFixed(1)}" y="${Math.min(y0, y1).toFixed(1)}" width="${Math.max(1, bw - gap).toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(3, bw / 4).toFixed(1)}" fill="${x.pl >= 0 ? "var(--pos)" : "var(--neg)"}"><title>${x.d}: ${signed(x.pl)}</title></rect>`; }).join("")}
+    ${ticks.map(v => `<line x1="${L}" x2="${Wd - R}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="var(--line)" stroke-width="1" ${v === 0 ? "" : 'stroke-dasharray="3 4"'}/><text x="${L - 6}" y="${(Y(v) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="JetBrains Mono, monospace">${Math.round(v)}</text>`).join("")}
+    ${ds.map((x, i) => { const y0 = Y(0), y1 = Y(x.pl), h = Math.max(1.5, Math.abs(y1 - y0)); return `<rect x="${(L + i * bw + gap / 2).toFixed(1)}" y="${Math.min(y0, y1).toFixed(1)}" width="${Math.max(1, bw - gap).toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(4, bw / 4).toFixed(1)}" fill="${x.pl >= 0 ? "var(--pos)" : "var(--neg)"}"><title>${x.d}: ${signed(x.pl)}</title></rect>`; }).join("")}
     ${ds.map((x, i) => i % every === 0 ? `<text x="${(L + i * bw + bw / 2).toFixed(1)}" y="${Ht - 6}" text-anchor="middle" font-size="11" fill="var(--muted)">${x.d.slice(8)}/${x.d.slice(5, 7)}</text>` : "").join("")}
   </svg>`;
 }
 
 function renderSync(acc) {
   const el = $("sync");
-  if (!acc || S.sec !== "perf") { el.className = "sync"; el.innerHTML = ""; return; }
+  if (!acc || !(S.sec === "engine" || S.sec === "trades") || A.sample) { el.className = "sync"; el.innerHTML = ""; return; }
   const t = (acc.updated || 0) * 1000, live = Date.now() - t < 5 * 60000;
-  el.className = "sync " + (live ? "live" : "stale");
-  el.innerHTML = `<i></i>${live ? "Live · " + ago(t) : "EA offline · " + ago(t)}`;
+  el.className = "sync " + (live ? "live" : "stale"); el.title = "Last update " + ago(t);
+  el.innerHTML = `<i></i>${live ? "Live" : "Offline"}`;
 }
 function linkSteps() {
   return `<ol class="steps">
-    <li><div><b>Attach EagleVision PRO V2.0</b> to any chart in MT5 on your PC or VPS.</div></li>
-    <li><div>In the EA inputs, open <b>EaglePro App</b> and type the same <b>email and password</b> you use here.</div></li>
-    <li><div>In MT5 go to <b>Tools → Options → Expert Advisors</b>, tick <b>Allow WebRequest</b> and add:<br><span class="mono" style="font-size:12.5px;overflow-wrap:anywhere">https://identitytoolkit.googleapis.com</span><br><span class="mono" style="font-size:12.5px;overflow-wrap:anywhere">${esc(FB_READY ? FB.db : "the database address shown in the EA")}</span></div></li>
-    <li><div>Within a minute the EA dashboard shows <b>EaglePro: linked</b> and your account appears here.</div></li>
+    <li><div><b>Attach ${EA}</b> to one chart in MT5 on your PC or VPS. It scans and trades the other symbols by itself.</div></li>
+    <li><div>In the EA inputs, open <b>DarkEngine app</b> and type the same <b>email and password</b> you use here.</div></li>
+    <li><div>In MT5 go to <b>Tools → Options → Expert Advisors</b>, tick <b>Allow WebRequest</b> and add:<br><span class="mono" style="font-size:12.5px;overflow-wrap:anywhere">https://identitytoolkit.googleapis.com</span><br><span class="mono" style="font-size:12.5px;overflow-wrap:anywhere">${esc(FB.db)}</span></div></li>
+    <li><div>Within a minute the EA dashboard shows <b>App: linked</b> and your account appears here. Results count from that moment on.</div></li>
   </ol>`;
 }
-function renderPerf() {
-  const el = $("sec-perf");
+function loadingOrEmpty(el) {
   if (A.accounts === null) {
     renderSync(null);
     el.innerHTML = A.loadErr ? `<div class="card full" style="display:grid;gap:10px"><h3>Could not load your accounts</h3><p class="muted">${esc(A.loadErr)}</p><button class="btn" id="btn-reload">Try again</button></div>`
-      : `<div class="skel full" style="height:190px"></div><div class="skel" style="height:120px"></div><div class="skel" style="height:120px"></div><div class="skel full" style="height:240px"></div>`;
-    return;
+      : `<div class="skel full" style="height:220px"></div><div class="skel full" style="height:110px"></div><div class="skel" style="height:140px"></div><div class="skel" style="height:140px"></div>`;
+    return true;
   }
-  const acc = currentAcct();
-  renderSync(acc);
-  if (!acc) {
-    el.innerHTML = `<div class="card full" style="display:grid;gap:14px"><span class="badge">No MT5 account linked yet</span><h2 style="font-size:26px">Link your first account</h2>
-      <p class="muted">EaglePro reads your results from the EagleVision PRO V2.0 EA running in MT5. Your MT5 password never leaves your computer.</p>${linkSteps()}
+  if (!currentAcct()) {
+    renderSync(null);
+    el.innerHTML = `<div class="card full" style="display:grid;gap:14px"><span class="badge ember">No MT5 account linked yet</span><h2 style="font-size:26px">Connect your engine</h2>
+      <p class="muted">The app reads results straight from ${EA} running in MT5. Your MT5 password never leaves your computer.</p>${linkSteps()}
       <button class="btn ghost" id="btn-reload">I have done this, check again</button></div>`;
-    return;
+    return true;
   }
-  const cur = acc.currency || "", ids = Object.keys(A.accounts), sm = summary(acc, A.range);
-  const td = (acc.days || {})[acc.today] || { pl: 0, pct: 0, n: 0, w: 0 };
-  const eas = (acc.eas || []).slice().sort((a, b) => b.pl - a.pl), mxEa = Math.max(1, ...eas.map(e => Math.abs(e.pl)));
-  const charts = acc.charts || [], scan = acc.scan || [], pos = acc.positions || [], deals = (acc.deals || []).slice(0, 15);
-  const dayRows = sm.ds.slice().reverse().slice(0, 31).map(x => `<tr><td class="num" style="white-space:nowrap">${esc(new Date(x.d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }))}</td><td class="r num">${x.n}</td><td class="r num">${x.n ? Math.round(x.w / x.n * 100) + "%" : "—"}</td><td class="r num ${pn(x.pl)}">${signed(x.pl)}</td><td class="r num ${pn(x.pct)}">${pc(x.pct || 0)}</td></tr>`).join("");
-  el.innerHTML = `
-  ${A.sample ? `<div class="card full row" style="justify-content:space-between"><span><span class="badge demo">Sample data</span> <span class="note">These numbers are examples, not a real account.</span></span><button class="linkbtn" id="btn-signout">Exit preview</button></div>` : ""}
-  ${ids.length > 1 ? `<div class="chips full" style="flex-direction:row;overflow-x:auto">${ids.map(id => `<button class="chip" data-acct="${esc(id)}" aria-pressed="${id === A.sel}">${esc(id)}<small>${esc(A.accounts[id].server || "")}</small></button>`).join("")}</div>` : ""}
-  <div class="hero full">
-    <div class="acct"><div style="min-width:0"><div class="eyebrow">${esc(acc.name || "MT5 account")} ${acc.demo ? "· Demo" : ""}</div>
+  return false;
+}
+function acctChips() {
+  const ids = Object.keys(A.accounts || {});
+  const demo = A.sample ? `<div class="card full row" style="justify-content:space-between"><span class="row" style="gap:8px"><span class="badge ember">Sample data</span><span class="note">Example numbers, not a real account.</span></span><button class="linkbtn" id="btn-signout">Exit preview</button></div>` : "";
+  return demo + (ids.length > 1 ? `<div class="chips full">${ids.map(id => `<button class="chip" data-acct="${esc(id)}" aria-pressed="${id === A.sel}">${esc(id)}<small>${esc(A.accounts[id].server || "")}</small></button>`).join("")}</div>` : "");
+}
+
+/* ---------- Engine section ---------- */
+function periodCard(title, p, next, kind, cur, tz) {
+  if (!p) return `<div class="period empty"><div class="eyebrow">${title}</div><div class="v">Not recorded yet</div><div class="foot">First close ${next ? esc(tzDay(next.close, tz) + " " + tzTime(next.close, tz) + " " + tzLbl(tz)) : "soon"}</div></div>`;
+  const name = kind === "day" ? dayName(p.key) : kind === "week" ? weekName(p.key) : monthName(p.key);
+  return `<div class="period ${p.pl > 0 ? "up" : p.pl < 0 ? "down" : ""}"><div class="eyebrow">${title}</div><div class="note" style="color:var(--fg);font-weight:600">${esc(name)}</div>
+    <div class="v num ${pn(p.pl)}">${signed(p.pl)}<span class="cur">${esc(cur)}</span></div>
+    <div class="foot num">${p.n} trade${p.n === 1 ? "" : "s"} · ${p.n ? Math.round(p.w / p.n * 100) + "% won" : "no closes"}</div></div>`;
+}
+function runRow(label, p, span) {
+  const now = Date.now() / 1000, frac = Math.min(1, Math.max(0, 1 - (p.close - now) / span));
+  return `<div class="run"><div><b>${label}</b> <span class="note">· closes in ${left((p.close - now) * 1000)}</span></div><div class="v num ${pn(p.pl)}">${signed(p.pl)}</div>
+    <div class="bar" aria-hidden="true"><i style="width:${(frac * 100).toFixed(1)}%"></i></div></div>`;
+}
+function renderEngine() {
+  const el = $("sec-engine");
+  if (loadingOrEmpty(el)) return;
+  const acc = currentAcct(); renderSync(acc);
+  const cur = acc.currency || "", sm = summary(acc, A.range), pos = acc.positions || [], P = acc.pnl, tz = tzOf(acc);
+  const charts = acc.charts || [], scan = acc.scan || [], e0 = (acc.eas || [])[0];
+  const periods = P ? `
+    <div class="full sechead"><h2>Results</h2><span class="note">Each period closes at ${String(P.closeHour ?? 23).padStart(2, "0")}:00 ${tzLbl(tz)}</span></div>
+    <div class="periods full">
+      ${periodCard("Previous day", P.prevDay, P.day, "day", cur, tz)}
+      ${periodCard("Previous week", P.prevWeek, P.week, "week", cur, tz)}
+      ${periodCard("Previous month", P.prevMonth, P.month, "month", cur, tz)}
+    </div>
+    <div class="card full running"><div class="row" style="justify-content:space-between"><h3>Running now</h3><span class="note num">since link ${esc(tzStamp(P.since, tz))}</span></div>
+      ${runRow("Today", P.day, 86400)}${runRow("This week", P.week, 7 * 86400)}${runRow("This month", P.month, 30.4 * 86400)}</div>`
+    : `<div class="card full" style="display:grid;gap:8px"><span class="badge ember">Update needed</span><h3>Day, week and month results need ${EA}</h3><p class="muted">This account is sending from an older EA. Attach ${EA} with the same email and password and the results cards fill in.</p></div>`;
+  $("sec-engine").innerHTML = `
+  ${acctChips()}
+  <div class="reactor full">
+    <div class="acct"><div style="min-width:0"><div class="eyebrow">${esc(acc.name || "MT5 account")}${acc.demo ? " · Demo" : ""}</div>
       <div class="note num" style="margin-top:2px;overflow-wrap:anywhere">${esc(acc.login)} · ${esc(acc.server || "")}</div></div>
-      <button class="btn" id="btn-pdf" ${A.pdfBusy ? "disabled" : ""}>${A.pdfBusy ? "Building…" : "Download PDF"}</button></div>
-    <div><div class="eyebrow">Balance</div><div class="big num">${money(acc.balance || 0)} <span style="font-size:.45em;color:var(--muted);font-weight:500">${esc(cur)}</span></div>
-      <div class="delta num ${pn(td.pl)}" style="margin-top:6px">${signed(td.pl)} today (${pc(td.pct || 0)})</div></div>
-    <div class="trio">
-      <div><div class="eyebrow">Equity</div><div class="v num">${money(acc.equity || 0)}</div></div>
-      <div><div class="eyebrow">Floating</div><div class="v num ${pn(acc.floating)}">${signed(acc.floating || 0)}</div></div>
+      <span class="badge ${Date.now() - (acc.updated || 0) * 1000 < 300000 || A.sample ? "pos" : "neg"}">${Date.now() - (acc.updated || 0) * 1000 < 300000 || A.sample ? "Engine running" : "Engine offline"}</span></div>
+    <div style="position:relative;z-index:1"><div class="eyebrow">Balance</div><div class="big num">${money(acc.balance || 0)}<span class="cur">${esc(cur)}</span></div>
+      ${P ? `<div class="num ${pn(P.day.pl)}" style="margin-top:6px;font-weight:700">${signed(P.day.pl)} today</div>` : ""}</div>
+    <div class="gauges">
+      <div class="gauge"><div class="eyebrow">Equity</div><div class="v num">${money(acc.equity || 0)}</div></div>
+      <div class="gauge"><div class="eyebrow">Floating</div><div class="v num ${pn(acc.floating)}">${signed(acc.floating || 0)}</div></div>
+      <div class="gauge"><div class="eyebrow">Open</div><div class="v num">${pos.length}</div></div>
     </div>
   </div>
-  <div class="tiles full">
-    <div class="tile"><div class="eyebrow">Open trades</div><div class="v num">${pos.length}</div><div class="s num">${pos.length ? "Floating " + signed(acc.floating || 0) : "None open"}</div></div>
-    <div class="tile"><div class="eyebrow">${A.range}-day profit</div><div class="v num ${pn(sm.pl)}">${signed(sm.pl)}</div><div class="s num">Growth ${pc(sm.growth)}</div></div>
-    <div class="tile"><div class="eyebrow">Win rate</div><div class="v num">${sm.n ? sm.win.toFixed(0) + "%" : "—"}</div><div class="s num">${sm.w} of ${sm.n} trades</div></div>
-    <div class="tile"><div class="eyebrow">Green days</div><div class="v num">${sm.traded ? sm.green + " / " + sm.traded : "—"}</div><div class="s num">Best ${sm.best ? signed(sm.best.pl) : "—"}</div></div>
-  </div>
+  ${acc.newsPause ? `<div class="pause full" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg><div><b>News pause</b><div class="note" style="color:var(--fg)">${esc(acc.newsPause)}</div><div class="note">No new trades on those symbols until the window passes. Open trades keep running.</div></div></div>` : ""}
+  ${periods}
   <div class="card full chart" style="display:grid;gap:10px">
     <div class="row" style="justify-content:space-between"><h3>Daily profit and loss</h3>
       <div class="seg" role="group" aria-label="Period">${[7, 30, 90].map(r => `<button data-range="${r}" aria-pressed="${A.range === r}">${r}D</button>`).join("")}</div></div>
     ${barsChart(sm.ds)}
+    <div class="row note num" style="gap:14px"><span>Total <b class="${pn(sm.pl)}">${signed(sm.pl)}</b></span><span>Won ${sm.n ? sm.win.toFixed(0) + "%" : "—"} of ${sm.n}</span><span>Green days ${sm.traded ? sm.green + "/" + sm.traded : "—"}</span></div>
   </div>
-  <div class="card full chart"><h3>Balance</h3><div style="margin-top:8px">${lineChart(sm.ds.map(x => [x.d, x.end]), [], { id: "bal", title: "Account balance", color: "var(--brass)", dot: "var(--brass)", fmt: v => Math.round(v).toLocaleString("en-US"), empty: "The balance curve appears after the first closed trade." })}</div></div>
-  <div class="card full" style="display:grid;gap:10px"><div class="ea" style="border:0;padding:0"><span class="ic">E</span><div style="min-width:0"><div class="nm">EagleVision PRO V2.0</div><div class="note">${charts[0] ? "Attached to " + esc(charts[0].sym) + " · " + esc(charts[0].tf) + (scan.length > 1 ? ", scanning " + scan.length + " symbols" : "") : "Running in MT5"}</div></div></div>
-    ${scan.length > 1 ? `<div class="symchips">${scan.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
-    ${eas[0] ? `<p class="note num">${eas[0].n} closed trades in the last ${acc.window || 90} days · ${eas[0].n ? Math.round(eas[0].w / eas[0].n * 100) : 0}% won · total <b class="${pn(eas[0].pl)}">${signed(eas[0].pl)}</b></p>` : `<p class="note">No closed EagleVision PRO V2.0 trades yet.</p>`}
-    <p class="note">Only trades opened by EagleVision PRO V2.0 are counted. Manual trades and other robots are left out.</p></div>
-  <div class="card full"><h3>Day by day</h3><div class="tbl" style="margin-top:8px"><table><thead><tr><th>Date</th><th class="r">Trades</th><th class="r">Won</th><th class="r">P/L ${esc(cur)}</th><th class="r">Change</th></tr></thead><tbody>${dayRows || `<tr><td colspan="5" class="muted">No trading days in this period.</td></tr>`}</tbody></table></div></div>
-  <div class="card"><h3>Open positions</h3><div class="tbl" style="margin-top:8px">${pos.length ? `<table><thead><tr><th>Symbol</th><th>Side</th><th class="r">Lots</th><th class="r">P/L</th></tr></thead><tbody>${pos.map(p => `<tr><td><b>${esc(p.sym)}</b><div class="note">${esc(p.ea)}</div></td><td><span class="side ${p.side === "buy" ? "buy" : "sell"}">${esc(p.side)}</span></td><td class="r num">${(+p.vol).toFixed(2)}</td><td class="r num ${pn(p.pl)}">${signed(p.pl)}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Nothing open.</p>`}</div></div>
-  <div class="card"><h3>Latest closed trades</h3><div class="tbl" style="margin-top:8px">${deals.length ? `<table><thead><tr><th>When</th><th>Trade</th><th class="r">P/L</th></tr></thead><tbody>${deals.map(d => `<tr><td class="num note">${esc(new Date(d.t * 1000).toISOString().slice(5, 16).replace("T", " "))}</td><td><b>${esc(d.sym)}</b> <span class="note">${esc(d.side)} ${(+d.vol).toFixed(2)}</span><div class="note">${esc(d.ea)}</div></td><td class="r num ${pn(d.pl)}">${signed(d.pl)}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">No closed trades yet.</p>`}</div></div>`;
+  <div class="card full chart"><h3>Balance</h3><div style="margin-top:8px">${lineChart(sm.ds.map(x => [x.d, x.end]), [], { id: "bal", title: "Account balance", color: "var(--ember)", dot: "var(--ember-2)", fmt: v => Math.round(v).toLocaleString("en-US"), empty: "The balance curve appears after the first closed trade." })}</div></div>
+  <div class="card full" style="display:grid;gap:12px">
+    <div class="engine"><span class="ic" aria-hidden="true">${MARK}</span><div style="min-width:0"><div style="font-family:var(--f-display);font-weight:700">${EA}</div>
+      <div class="note">${charts[0] ? "On " + esc(charts[0].sym) + " · " + esc(charts[0].tf) : "Running in MT5"}${scan.length ? " · scanning " + scan.length + " symbols" : ""}</div></div></div>
+    <div class="row" style="gap:6px"><span class="badge ${acc.newsFilter === false ? "" : "cool"}">News filter ${acc.newsFilter === false ? "off" : "on"}</span>${e0 ? `<span class="badge">${e0.n} closed · ${e0.n ? Math.round(e0.w / e0.n * 100) : 0}% won</span><span class="badge ${e0.pl >= 0 ? "pos" : "neg"}">${signed(e0.pl)} ${esc(cur)}</span>` : ""}</div>
+    ${scan.length ? `<div class="symchips">${scan.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
+    <p class="note">Only trades opened by ${EA} count, including the ones you close by hand. Your own manual trades are left out.</p>
+  </div>`;
+}
+
+/* ---------- Trades section ---------- */
+const HOW = { tp: ["Take profit", "pos"], sl: ["Stop loss", "neg"], ea: ["Closed by engine", "ember"], manual: ["Closed by you", "cool"], stopout: ["Stop out", "neg"] };
+function renderTrades() {
+  const el = $("sec-trades");
+  if (loadingOrEmpty(el)) return;
+  const acc = currentAcct(); renderSync(acc);
+  const cur = acc.currency || "", tz = tzOf(acc), pos = acc.positions || [], deals = acc.deals || [], v = A.tview;
+  const dg = x => { const s = String(x).split(".")[1]; return s ? s.length : 2; };
+  let body = "";
+  if (v === "open") body = pos.length ? `<div class="trades">${pos.map(p => `<div class="trade"><span class="dir ${p.side === "buy" ? "buy" : "sell"}">${p.side === "buy" ? "BUY" : "SELL"}</span>
+      <div style="min-width:0"><div class="sym">${esc(p.sym)}</div></div><div class="pl num ${pn(p.pl)}">${signed(p.pl)}</div>
+      <div class="meta num"><span>${(+p.vol).toFixed(2)} lots @ ${esc(p.open)}</span>${p.sl ? `<span>SL ${(+p.sl).toFixed(dg(p.open))}</span>` : ""}${p.tp ? `<span>TP ${(+p.tp).toFixed(dg(p.open))}</span>` : ""}${p.strat ? `<span>${esc(p.strat)}</span>` : ""}${p.t ? `<span>opened ${esc(tzStamp(p.t, tz))}</span>` : ""}</div></div>`).join("")}</div>`
+    : `<div class="card"><p class="muted">Nothing open. The engine is waiting for its next setup.</p></div>`;
+  else if (v === "closed") body = deals.length ? `<div class="trades">${deals.map(d => { const h = HOW[d.how] || ["Closed", ""]; return `<div class="trade"><span class="dir ${d.side === "buy" ? "buy" : "sell"}">${d.side === "buy" ? "BUY" : "SELL"}</span>
+      <div style="min-width:0"><div class="sym">${esc(d.sym)}</div></div><div class="pl num ${pn(d.pl)}">${signed(d.pl)}</div>
+      <div class="meta num"><span class="badge ${h[1]}">${h[0]}</span><span>${(+d.vol).toFixed(2)} lots</span>${d.strat ? `<span>${esc(d.strat)}</span>` : ""}<span>${esc(tzStamp(d.t, tz))}</span></div></div>`; }).join("")}</div>`
+    : `<div class="card"><p class="muted">No closed trades since the account was linked.</p></div>`;
+  else {
+    const rows = daysOf(acc, 0).reverse().map(x => `<tr><td class="num" style="white-space:nowrap">${esc(dayName(x.d))}</td><td class="r num">${x.n}</td><td class="r num">${x.n ? Math.round(x.w / x.n * 100) + "%" : "—"}</td><td class="r num ${pn(x.pl)}">${signed(x.pl)}</td><td class="r num ${pn(x.pct)}">${pc(x.pct || 0)}</td></tr>`).join("");
+    body = `<div class="card"><div class="tbl"><table><thead><tr><th>Day (to 23:00)</th><th class="r">Trades</th><th class="r">Won</th><th class="r">P/L ${esc(cur)}</th><th class="r">Change</th></tr></thead><tbody>${rows || `<tr><td colspan="5" class="muted">No trading days yet.</td></tr>`}</tbody></table></div></div>`;
+  }
+  el.innerHTML = `${acctChips()}
+    <div class="sechead"><h2>Trades</h2><button class="btn ghost" id="btn-pdf" ${A.pdfBusy ? "disabled" : ""}>${A.pdfBusy ? "Building…" : "PDF report"}</button></div>
+    <div class="seg" role="group" aria-label="Show">${[["open", `Open · ${pos.length}`], ["closed", "Closed"], ["days", "Days"]].map(([k, n]) => `<button data-tview="${k}" aria-pressed="${v === k}">${n}</button>`).join("")}</div>
+    ${body}
+    <p class="note">Times in ${tzLbl(tz)}. ${v === "closed" ? "Shows the latest 60 closes. " : ""}Trades you open yourself are not shown or counted.</p>`;
+}
+
+/* ---------- News from the EA (top of the News tab) ---------- */
+const USD_LIKE = /XAU|XAG|GOLD|SILVER|US30|US100|US500|NAS|SPX|DJ|USTEC|WTI|OIL|BTC|ETH/i;
+function affected(cur, scan) { return (scan || []).filter(s => s.toUpperCase().includes(cur) || (cur === "USD" && USD_LIKE.test(s))); }
+function renderEaNews() {
+  const el = $("eanews"), acc = A.accounts ? currentAcct() : null;
+  if (!acc) { el.innerHTML = ""; return; }
+  const tz = tzOf(acc), now = Date.now() / 1000, list = (acc.news || []).slice().sort((a, b) => a.t - b.t);
+  el.innerHTML = `<div class="card" style="display:grid;gap:4px">
+    <div class="row" style="justify-content:space-between"><div><div class="eyebrow">From your engine · next 24h</div><h3 style="margin-top:4px">News that pauses trading</h3></div>
+      <span class="badge ${acc.newsFilter === false ? "" : "cool"}">Filter ${acc.newsFilter === false ? "off" : "on"}</span></div>
+    ${acc.newsPause ? `<div class="pause" style="margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg><div class="note" style="color:var(--fg)">${esc(acc.newsPause)}</div></div>` : ""}
+    ${list.length ? list.map(n => { const aff = affected(n.cur, acc.scan); return `<div class="newsitem ${n.t < now ? "past" : ""}"><span class="cur ${n.imp >= 3 ? "hi" : ""}">${esc(n.cur)}</span>
+      <div style="min-width:0"><div style="font-weight:700">${esc(n.name)}</div><div class="note num">${esc(tzDay(n.t, tz))} · ${esc(tzTime(n.t, tz))} ${tzLbl(tz)} · ${n.t > now ? "in " + left((n.t - now) * 1000) : "passed"}</div>
+      ${aff.length ? `<div class="note">Pauses: ${aff.slice(0, 6).map(esc).join(", ")}${aff.length > 6 ? " +" + (aff.length - 6) : ""}</div>` : ""}</div></div>`; }).join("")
+      : `<p class="muted" style="padding:8px 0">${acc.pnl ? "No high-impact news in the next 24 hours." : "Update the EA to " + EA + " to see its news list."}</p>`}
+    <p class="note">Synthetic indices (Volatility, Step, Crash, Boom) are never paused. You get an alert ${NOTIF.prefs.lead} minutes before each item.</p>
+  </div>`;
 }
 
 /* ---------- PDF report ---------- */
@@ -923,57 +1167,55 @@ async function ensurePdf() {
   if (!(window.jspdf && window.jspdf.jsPDF)) await loadScript(["jspdf.umd.min.js", "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"]);
   if (!(window.jspdf.jsPDF.API && window.jspdf.jsPDF.API.autoTable)) await loadScript(["jspdf.plugin.autotable.min.js", "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"]);
 }
-const asc = v => String(v).replace(/−/g, "-").replace(/[^\x20-\x7E]/g, "");
+const asc = v => String(v).replace(/−/g, "-").replace(/–/g, "-").replace(/[^\x20-\x7E]/g, "");
 async function makePdf() {
   const acc = currentAcct(); if (!acc || A.pdfBusy) return;
   A.pdfBusy = true; render();
   try {
     await ensurePdf();
-    const doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" }), W = doc.internal.pageSize.getWidth(), sm = summary(acc, A.range), cur = acc.currency || "";
-    const td = (acc.days || {})[acc.today] || { pl: 0, pct: 0 };
-    doc.setFillColor(11, 15, 23); doc.rect(0, 0, W, 92, "F");
-    doc.setFillColor(46, 196, 182); doc.rect(0, 92, W, 3, "F");
-    doc.setTextColor(255); doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.text("EaglePro", 40, 44);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(190, 200, 215);
-    doc.text(`EA performance report  |  last ${A.range} days`, 40, 64);
-    doc.text(asc(new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC"), W - 40, 44, { align: "right" });
-    doc.text(asc(`${acc.login}  |  ${acc.server || ""}`), W - 40, 64, { align: "right" });
-    doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.text(asc(`${acc.name || "MT5 account"}${acc.demo ? " (demo)" : ""}  -  ${acc.broker || ""}`), 40, 124);
-    const head = { fillColor: [18, 24, 38], textColor: 255, fontStyle: "bold" }, st = { fontSize: 9.5, cellPadding: 5 };
-    doc.autoTable({ startY: 138, theme: "grid", styles: st, headStyles: head, margin: { left: 40, right: 40 },
-      head: [["Balance", "Equity", "Today", `${A.range}-day profit`, "Growth", "Win rate", "Trades"]],
-      body: [[asc(money(acc.balance || 0, cur)), asc(money(acc.equity || 0, cur)), asc(`${signed(td.pl)} (${pc(td.pct || 0)})`), asc(signed(sm.pl)), asc(pc(sm.growth)), sm.n ? sm.win.toFixed(0) + "%" : "-", String(sm.n)]] });
+    const doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" }), W = doc.internal.pageSize.getWidth(), sm = summary(acc, A.range), cur = acc.currency || "", tz = tzOf(acc), P = acc.pnl;
+    doc.setFillColor(7, 8, 11); doc.rect(0, 0, W, 92, "F");
+    doc.setFillColor(255, 106, 26); doc.rect(0, 92, W, 4, "F");
+    doc.setTextColor(255); doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.text("DARK", 40, 46); doc.setTextColor(255, 106, 26); doc.text("ENGINE", 40 + doc.getTextWidth("DARK") + 2, 46);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(200, 196, 190);
+    doc.text(`${EA} performance report  |  last ${A.range} days`, 40, 66);
+    doc.text(asc(tzStamp(Math.floor(Date.now() / 1000), tz) + " " + tzLbl(tz)), W - 40, 46, { align: "right" });
+    doc.text(asc(`${acc.login}  |  ${acc.server || ""}`), W - 40, 66, { align: "right" });
+    doc.setTextColor(20); doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.text(asc(`${acc.name || "MT5 account"}${acc.demo ? " (demo)" : ""}  -  ${acc.broker || ""}`), 40, 126);
+    const head = { fillColor: [24, 26, 32], textColor: 255, fontStyle: "bold" }, st = { fontSize: 9.5, cellPadding: 5 }, mg = { left: 40, right: 40 };
+    const color = d => { if (d.section === "body" && typeof d.cell.raw === "string" && /^[+-]\d/.test(d.cell.raw)) d.cell.styles.textColor = d.cell.raw.startsWith("-") ? [200, 40, 70] : [40, 140, 40]; };
+    doc.autoTable({ startY: 140, theme: "grid", styles: st, headStyles: head, margin: mg,
+      head: [["Balance", "Equity", "Floating", `${A.range}-day profit`, "Growth", "Win rate", "Trades"]],
+      body: [[asc(money(acc.balance || 0, cur)), asc(money(acc.equity || 0, cur)), asc(signed(acc.floating || 0)), asc(signed(sm.pl)), asc(pc(sm.growth)), sm.n ? sm.win.toFixed(0) + "%" : "-", String(sm.n)]], didParseCell: color });
     const sect = (title, y) => { doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(20); doc.text(title, 40, y); };
     let y = doc.lastAutoTable.finalY + 26;
-    sect("EAs attached to charts", y);
-    doc.autoTable({ startY: y + 8, theme: "striped", styles: st, headStyles: head, margin: { left: 40, right: 40 }, head: [["EA", "Symbol", "Timeframe"]],
-      body: (acc.charts || []).length ? acc.charts.map(c => [asc(c.name), asc(c.sym), asc(c.tf)]) : [["No EA attached", "", ""]] });
-    y = doc.lastAutoTable.finalY + 26; sect("Profit by EA", y);
-    doc.autoTable({ startY: y + 8, theme: "striped", styles: st, headStyles: head, margin: { left: 40, right: 40 }, head: [["EA", "Trades", "Won", `P/L ${cur}`]],
-      columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" } },
-      body: (acc.eas || []).length ? acc.eas.map(e => [asc(e.name), String(e.n), e.n ? Math.round(e.w / e.n * 100) + "%" : "-", asc(signed(e.pl))]) : [["No closed trades", "", "", ""]] });
-    y = doc.lastAutoTable.finalY + 26; sect("Daily results", y);
-    doc.autoTable({ startY: y + 8, theme: "striped", styles: st, headStyles: head, margin: { left: 40, right: 40 }, head: [["Date", "Trades", "Won", `P/L ${cur}`, "Change", "Closing balance"]],
-      columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" }, 5: { halign: "right" } },
-      body: sm.ds.slice().reverse().map(x => [x.d, String(x.n), x.n ? Math.round(x.w / x.n * 100) + "%" : "-", asc(signed(x.pl)), asc(pc(x.pct || 0)), asc(money(x.end || 0))]),
-      didParseCell: d => { if (d.section === "body" && (d.column.index === 3 || d.column.index === 4)) d.cell.styles.textColor = String(d.cell.raw).startsWith("-") ? [200, 50, 50] : [20, 140, 100]; } });
+    if (P) {
+      sect(`Period results (close ${String(P.closeHour ?? 23).padStart(2, "0")}:00 ${tzLbl(tz)})`, y);
+      const row = (n, p, kind) => p ? [n, asc(kind === "day" ? dayName(p.key) : kind === "week" ? weekName(p.key) : monthName(p.key)), String(p.n), p.n ? Math.round(p.w / p.n * 100) + "%" : "-", asc(signed(p.pl))] : [n, "Not recorded yet", "", "", ""];
+      doc.autoTable({ startY: y + 8, theme: "striped", styles: st, headStyles: head, margin: mg, head: [["Period", "Dates", "Trades", "Won", `P/L ${cur}`]],
+        columnStyles: { 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } }, didParseCell: color,
+        body: [row("Previous day", P.prevDay, "day"), row("Previous week", P.prevWeek, "week"), row("Previous month", P.prevMonth, "month"), row("Today so far", P.day, "day"), row("This week so far", P.week, "week"), row("This month so far", P.month, "month")] });
+      y = doc.lastAutoTable.finalY + 26;
+    }
+    sect("Daily results", y);
+    doc.autoTable({ startY: y + 8, theme: "striped", styles: st, headStyles: head, margin: mg, head: [["Day", "Trades", "Won", `P/L ${cur}`, "Change", "Closing balance"]],
+      columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" }, 5: { halign: "right" } }, didParseCell: color,
+      body: sm.ds.slice().reverse().map(x => [x.d, String(x.n), x.n ? Math.round(x.w / x.n * 100) + "%" : "-", asc(signed(x.pl)), asc(pc(x.pct || 0)), asc(money(x.end || 0))]) });
     if ((acc.deals || []).length) {
       y = doc.lastAutoTable.finalY + 26; if (y > 720) { doc.addPage(); y = 50; } sect("Latest closed trades", y);
-      doc.autoTable({ startY: y + 8, theme: "striped", styles: st, headStyles: head, margin: { left: 40, right: 40 }, head: [["Time (server)", "Symbol", "Side", "Lots", "EA", "P/L"]],
-        columnStyles: { 3: { halign: "right" }, 5: { halign: "right" } },
-        body: acc.deals.slice(0, 40).map(d => [new Date(d.t * 1000).toISOString().slice(0, 16).replace("T", " "), asc(d.sym), asc(d.side), (+d.vol).toFixed(2), asc(d.ea), asc(signed(d.pl))]) });
+      doc.autoTable({ startY: y + 8, theme: "striped", styles: st, headStyles: head, margin: mg, head: [[`Time (${tzLbl(tz)})`, "Symbol", "Side", "Lots", "Signal", "Closed by", "P/L"]],
+        columnStyles: { 3: { halign: "right" }, 6: { halign: "right" } }, didParseCell: color,
+        body: acc.deals.slice(0, 60).map(d => [asc(tzStamp(d.t, tz)), asc(d.sym), asc(d.side), (+d.vol).toFixed(2), asc(d.strat || ""), asc((HOW[d.how] || ["-"])[0]), asc(signed(d.pl))]) });
     }
     const pages = doc.getNumberOfPages();
-    for (let i = 1; i <= pages; i++) { doc.setPage(i); doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(130); doc.text(`EaglePro report  |  page ${i} of ${pages}  |  Past results do not guarantee future results.`, 40, doc.internal.pageSize.getHeight() - 24); }
-    const name = `EaglePro_${acc.login}_${new Date().toISOString().slice(0, 10)}.pdf`;
-    const C = window.Capacitor;
-    if (C && C.isNativePlatform && C.isNativePlatform()) {
-      const call = (plugin, method, opts) => C.nativePromise ? C.nativePromise(plugin, method, opts) : C.Plugins[plugin][method](opts);
+    for (let i = 1; i <= pages; i++) { doc.setPage(i); doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(130); doc.text(`DarkEngine report  |  page ${i} of ${pages}  |  Past results do not guarantee future results.`, 40, doc.internal.pageSize.getHeight() - 24); }
+    const name = `DarkEngine_${acc.login}_${new Date().toISOString().slice(0, 10)}.pdf`;
+    if (isNative()) {
       const b64 = doc.output("datauristring").split(",")[1];
-      const w = await call("Filesystem", "writeFile", { path: name, data: b64, directory: "CACHE" });
-      let saved = false; try { await call("Filesystem", "writeFile", { path: name, data: b64, directory: "DOCUMENTS" }); saved = true; } catch (e) {}
+      const w = await nat("Filesystem", "writeFile", { path: name, data: b64, directory: "CACHE" });
+      let saved = false; try { await nat("Filesystem", "writeFile", { path: name, data: b64, directory: "DOCUMENTS" }); saved = true; } catch (e) {}
       toast(saved ? "Saved to Documents" : "Report ready");
-      try { await call("Share", "share", { title: name, url: w.uri, dialogTitle: "Save or send the report" }); } catch (e) {}
+      try { await nat("Share", "share", { title: name, url: w.uri, dialogTitle: "Save or send the report" }); } catch (e) {}
     } else { doc.save(name); toast("Report downloaded"); }
   } catch (e) { toast("Could not build the report. Check your internet and try again."); }
   A.pdfBusy = false; render();
@@ -1000,8 +1242,7 @@ function parseRss(xml, src) {
   return out;
 }
 async function fetchFeed(src, url) {
-  const native = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
-  if (native) { try { const r = await fetch(url); if (r.ok) { const items = parseRss(await r.text(), src); if (items.length) return items; } } catch (e) {} }
+  if (isNative()) { try { const r = await fetch(url); if (r.ok) { const items = parseRss(await r.text(), src); if (items.length) return items; } } catch (e) {} }
   const j = await getJSON("https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(url));
   return (j.items || []).map(i => ({ src, title: plain(i.title), link: i.link, t: Date.parse((i.pubDate || "").replace(" ", "T") + "Z") || 0, body: clip(plain(i.content || i.description), 900), img: i.thumbnail || (i.enclosure && /image/.test(i.enclosure.type || "image") && i.enclosure.link) || "" })).filter(i => i.title && i.link);
 }
@@ -1020,8 +1261,8 @@ function renderWorld() {
   const cat = A.world.cat, items = A.world.items[cat] || [];
   const safe = u => /^https:\/\//.test(u || "") ? u : "";
   $("sec-world").innerHTML = `
-    <div class="row" style="justify-content:space-between"><h2 style="font-size:26px">World news</h2><button class="btn ghost" id="btn-world" ${A.worldBusy ? "disabled" : ""}>${A.worldBusy ? "Loading…" : "Refresh"}</button></div>
-    <div class="chips" style="flex-direction:row">${CATS.map(([id, n]) => `<button class="chip" data-cat="${id}" aria-pressed="${id === cat}">${n}</button>`).join("")}</div>
+    <div class="sechead"><h2>World news</h2><button class="btn ghost" id="btn-world" ${A.worldBusy ? "disabled" : ""}>${A.worldBusy ? "Loading…" : "Refresh"}</button></div>
+    <div class="chips">${CATS.map(([id, n]) => `<button class="chip" data-cat="${id}" aria-pressed="${id === cat}">${n}</button>`).join("")}</div>
     ${A.worldErr && !items.length ? `<div class="card"><p class="muted">${esc(A.worldErr)}</p></div>` : ""}
     ${!items.length && A.worldBusy ? `<div class="skel" style="height:300px"></div><div class="skel" style="height:300px"></div>` : ""}
     ${items.map(i => `<article class="card story">
@@ -1034,53 +1275,70 @@ function renderWorld() {
     ${items.length ? `<p class="note">Headlines and summaries come from each publisher's public feed. Updated ${esc(ago(A.world.t[cat] || Date.now()))}.</p>` : ""}`;
 }
 
-/* ---------- account ---------- */
-function renderAccount() {
-  const ids = Object.keys(A.accounts || {});
-  $("sec-account").innerHTML = `
-    <div class="card full" style="display:grid;gap:12px">
-      <div class="row" style="justify-content:space-between"><div style="min-width:0"><div class="eyebrow">Signed in as</div><div style="font-weight:600;font-size:17px;overflow-wrap:anywhere">${esc(A.user.email)}</div></div>
-        <button class="btn ghost" id="btn-signout">${A.sample ? "Exit preview" : "Sign out"}</button></div>
+/* ---------- Settings ---------- */
+function renderSettings() {
+  const ids = Object.keys(A.accounts || {}), nat_ = isNative(), p = NOTIF.prefs;
+  const permTxt = !nat_ ? "Alerts appear in the Android app only." : NOTIF.perm === "granted" ? "Allowed" : NOTIF.perm === "denied" ? "Blocked. Open Android Settings → Apps → DarkEngine → Notifications to allow them." : "Not allowed yet";
+  $("sec-settings").innerHTML = `
+    <div class="card full" style="display:grid;gap:6px">
+      <div class="row" style="justify-content:space-between"><div><div class="eyebrow">Alerts</div><h3 style="margin-top:4px">Notifications</h3></div>
+        <span class="badge ${NOTIF.perm === "granted" ? "pos" : nat_ ? "neg" : ""}">${NOTIF.perm === "granted" ? "On" : nat_ ? "Off" : "App only"}</span></div>
+      <p class="note">${esc(permTxt)}</p>
+      ${nat_ && NOTIF.perm !== "granted" && NOTIF.perm !== "denied" ? `<button class="btn" id="btn-perm" style="justify-self:start;margin-top:6px">Allow notifications</button>` : ""}
+      <label class="switch"><span><b>New trades</b><div class="note">When ${EA} opens a trade on any linked account.</div></span><input type="checkbox" data-pref="trades" ${p.trades ? "checked" : ""}></label>
+      <label class="switch"><span><b>Upcoming news</b><div class="note">High-impact news the EA pauses for.</div></span><input type="checkbox" data-pref="news" ${p.news ? "checked" : ""}></label>
+      <div class="switch"><span><b>News warning</b><div class="note">How long before the release.</div></span><div class="seg" role="group" aria-label="Minutes before news">${[5, 15, 30].map(m => `<button data-lead="${m}" aria-pressed="${p.lead === m}">${m} min</button>`).join("")}</div></div>
+      <div class="row" style="margin-top:8px"><button class="btn ghost" id="btn-test">Send a test alert</button></div>
+      <p class="note" style="margin-top:8px">With the app open, alerts arrive within seconds. With the app closed, Android checks every 15 minutes, so a trade alert can come up to 15 minutes late. For the most reliable checks, set Battery for DarkEngine to <b>Unrestricted</b> in Android settings.${nat_ && NOTIF.exact === "denied" ? " Exact news timing is off: allow <b>Alarms &amp; reminders</b> for DarkEngine." : ""}</p>
     </div>
     <div class="card" style="display:grid;gap:10px"><h3>Linked MT5 accounts</h3>
-      ${ids.length ? ids.map(id => { const a = A.accounts[id]; return `<div class="ea"><span class="ic">${esc(String(a.broker || "M").slice(0, 1))}</span><div style="min-width:0"><div class="nm num">${esc(id)}</div><div class="note" style="overflow-wrap:anywhere">${esc(a.server || "")} · last sync ${esc(ago((a.updated || 0) * 1000))}</div></div><div class="rt num">${money(a.balance || 0)}<div class="note">${esc(a.currency || "")}</div></div></div>`; }).join("") : `<p class="muted">None yet.</p>`}
+      ${ids.length ? ids.map(id => { const a = A.accounts[id]; return `<div class="engine"><span class="ic mono" style="font-weight:700;color:var(--ember)">${esc(String(a.broker || "M").slice(0, 1))}</span><div style="min-width:0;flex:1"><div class="num" style="font-weight:700">${esc(id)}</div><div class="note" style="overflow-wrap:anywhere">${esc(a.server || "")} · ${a.pnl ? "" : "old EA · "}synced ${esc(ago((a.updated || 0) * 1000))}</div></div><div class="num" style="text-align:right;font-weight:700">${money(a.balance || 0)}<div class="note">${esc(a.currency || "")}</div></div></div>`; }).join("") : `<p class="muted">None yet.</p>`}
     </div>
-    <div class="card" style="display:grid;gap:12px"><h3>Link another account</h3>${linkSteps()}</div>
-    ${dataCards()}`;
+    <div class="card" style="display:grid;gap:12px"><h3>Link an account</h3>${linkSteps()}</div>
+    ${dataCards()}
+    <div class="card full" style="display:grid;gap:12px">
+      <div class="row" style="justify-content:space-between"><div style="min-width:0"><div class="eyebrow">Signed in as</div><div style="font-weight:700;font-size:17px;overflow-wrap:anywhere">${esc(A.user.email)}</div></div>
+        <button class="btn ghost" id="btn-signout">${A.sample ? "Exit preview" : "Sign out"}</button></div>
+      <p class="note">DarkEngine ${APP_VER} · for ${EA}. Change your password from the menu.</p>
+    </div>`;
 }
 
 /* ---------- shell ---------- */
+const SECS = ["engine", "trades", "news", "world", "settings"];
 function render() {
   const authed = !!A.user;
   $("auth").hidden = authed; $("app").hidden = !authed;
   if (!authed) { renderAuth(); return; }
-  document.querySelectorAll(".navbtn").forEach(b => b.setAttribute("aria-current", b.dataset.sec === S.sec ? "page" : "false"));
-  for (const s of ["perf", "news", "world", "account"]) $("sec-" + s).hidden = s !== S.sec;
-  if (S.sec === "news") { renderSync(null); renderNews(); }
+  document.querySelectorAll(".dockbtn").forEach(b => b.setAttribute("aria-current", b.dataset.sec === S.sec ? "page" : "false"));
+  for (const s of SECS) $("sec-" + s).hidden = s !== S.sec;
+  renderBell();
+  if (S.sec === "news") { renderSync(null); renderEaNews(); renderNews(); }
   else if (S.sec === "world") { renderSync(null); renderWorld(); loadWorld(false); }
-  else if (S.sec === "account") { renderSync(null); renderAccount(); }
-  else renderPerf();
+  else if (S.sec === "settings") { renderSync(null); renderSettings(); }
+  else if (S.sec === "trades") renderTrades();
+  else renderEngine();
 }
+function go(sec) { S.sec = sec; store.set("sec", sec); render(); window.scrollTo({ top: 0 }); if (sec === "engine" || sec === "trades") loadAccounts(); }
 const MI = {
   key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/></svg>',
   sync: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4"/></svg>',
-  link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
-  pdf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M12 12v5M9.500 14.500L12 17l2.500-2.500"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 14H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 10h0a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  pdf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M12 12v5M9.5 14.5L12 17l2.5-2.5"/></svg>',
   out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10"/></svg>',
 };
 function renderMenu() {
   const m = $("menu"), open = !!A.menu; m.hidden = !open; $("scrim").hidden = !open; if (!open) return;
-  m.innerHTML = `<div class="who"><div class="eyebrow">Signed in as</div><div style="font-weight:600;overflow-wrap:anywhere">${esc(A.user ? A.user.email : "")}</div></div>
+  m.innerHTML = `<div class="who"><div class="eyebrow">Signed in as</div><div style="font-weight:700;overflow-wrap:anywhere">${esc(A.user ? A.user.email : "")}</div></div>
+    <button class="mi" id="mi-settings">${MI.gear}Settings and alerts</button>
+    <button class="mi" id="mi-refresh">${MI.sync}Refresh now</button>
+    <button class="mi" id="mi-pdf">${MI.pdf}Download PDF report</button>
     <button class="mi" id="mi-pass">${MI.key}Change password</button>
     ${A.menu === "pass" ? `<form id="passform"><input id="np1" type="password" autocomplete="new-password" placeholder="New password (6+ characters)" minlength="6" required>
       <input id="np2" type="password" autocomplete="new-password" placeholder="Repeat new password" minlength="6" required>
       ${A.merr ? `<div class="note" style="color:var(--neg)">${esc(A.merr)}</div>` : ""}<button class="btn" ${A.mbusy ? "disabled" : ""}>${A.mbusy ? "Saving…" : "Save new password"}</button>
       <div class="note">After changing it, type the new password in the EA inputs too.</div></form>` : ""}
-    <button class="mi" id="mi-refresh">${MI.sync}Refresh now</button>
-    <button class="mi" id="mi-link">${MI.link}Linked accounts and EA setup</button>
-    <button class="mi" id="mi-pdf">${MI.pdf}Download PDF report</button>
     <button class="mi danger" id="mi-out">${MI.out}${A.sample ? "Exit preview" : "Sign out"}</button>
-    <div class="note" style="padding:8px 12px 6px">EaglePro 3.0 · for EagleVision PRO V2.0</div>`;
+    <div class="note" style="padding:8px 12px 6px">DarkEngine ${APP_VER} · for ${EA}</div>`;
 }
 function closeMenu() { A.menu = null; A.merr = ""; renderMenu(); }
 async function changePass() {
@@ -1089,40 +1347,51 @@ async function changePass() {
   if (a !== b) { A.merr = "The two passwords do not match."; renderMenu(); return; }
   if (A.sample) { A.merr = "Not available in the preview."; renderMenu(); return; }
   A.mbusy = true; A.merr = ""; renderMenu();
-  try { const t = await token(); const j = await fbAuth("update", { idToken: t, password: a, returnSecureToken: true }); if (!j.email) j.email = A.user.email; setUser(j); A.mbusy = false; closeMenu(); toast("Password changed"); }
+  try { const t = await token(); const j = await fbAuth("update", { idToken: t, password: a, returnSecureToken: true }); if (!j.email) j.email = A.user.email; setUser(j); pushAuth(); A.mbusy = false; closeMenu(); toast("Password changed"); }
   catch (e) { A.mbusy = false; A.merr = /CREDENTIAL_TOO_OLD|TOKEN_EXPIRED|INVALID_ID_TOKEN/.test(e.message || "") ? "For safety, sign out, sign in again, then change the password." : (e.message || "Could not change the password."); renderMenu(); }
 }
 document.addEventListener("submit", e => { if (e.target.id === "passform") { e.preventDefault(); changePass(); } });
 document.addEventListener("click", e => { if (e.target.id === "scrim") closeMenu(); });
 function etClick(b) {
   if (b.id === "btn-menu") { A.menu = A.menu ? null : "open"; A.merr = ""; renderMenu(); return true; }
+  if (b.id === "btn-bell" || b.id === "mi-settings") { closeMenu(); go("settings"); return true; }
   if (b.id === "mi-pass") { A.menu = A.menu === "pass" ? "open" : "pass"; A.merr = ""; renderMenu(); if (A.menu === "pass") $("np1").focus(); return true; }
   if (b.id === "mi-refresh") { closeMenu(); A.sig = ""; loadAccounts(); refresh(true); loadWorld(true); toast("Refreshing"); return true; }
-  if (b.id === "mi-link") { closeMenu(); S.sec = "account"; store.set("sec", S.sec); render(); window.scrollTo({ top: 0 }); return true; }
-  if (b.id === "mi-pdf") { closeMenu(); S.sec = "perf"; render(); makePdf(); return true; }
+  if (b.id === "mi-pdf") { closeMenu(); go("trades"); makePdf(); return true; }
   if (b.id === "mi-out") { closeMenu(); signOut(); return true; }
-  if (b.dataset.sec) { S.sec = b.dataset.sec; store.set("sec", S.sec); render(); window.scrollTo({ top: 0 }); if (S.sec === "perf") loadAccounts(); return true; }
+  if (b.dataset.sec) { go(b.dataset.sec); return true; }
   if (b.dataset.mode) { A.mode = b.dataset.mode; A.err = ""; A.ok = ""; render(); return true; }
   if (b.dataset.acct) { A.sel = b.dataset.acct; store.set("acct", A.sel); render(); return true; }
   if (b.dataset.range) { A.range = +b.dataset.range; store.set("range", A.range); render(); return true; }
+  if (b.dataset.tview) { A.tview = b.dataset.tview; store.set("tview", A.tview); render(); return true; }
+  if (b.dataset.lead) { setPref("lead", +b.dataset.lead); return true; }
   if (b.dataset.cat) { A.world.cat = b.dataset.cat; render(); return true; }
   if (b.id === "btn-signout") { signOut(); return true; }
   if (b.id === "btn-reload") { A.accounts = A.sample ? A.accounts : null; A.loadErr = ""; render(); loadAccounts(); return true; }
   if (b.id === "btn-pdf") { makePdf(); return true; }
   if (b.id === "btn-world") { loadWorld(true); return true; }
-  if (b.id === "btn-sample") { A.sample = true; A.user = { email: "preview@eagletracker.app", uid: "sample", exp: Infinity }; A.accounts = sampleAccounts(); S.sec = "perf"; render(); return true; }
+  if (b.id === "btn-perm") { askPermission(); return true; }
+  if (b.id === "btn-test") { testAlert(); return true; }
+  if (b.id === "btn-sample") { A.sample = true; A.user = { email: "preview@darkengine.app", uid: "sample", exp: Infinity }; A.accounts = sampleAccounts(); S.sec = "engine"; render(); return true; }
   return false;
 }
 document.addEventListener("submit", e => { if (e.target.id === "authform") { e.preventDefault(); submitAuth(); } });
 document.addEventListener("input", e => { if (e.target.id === "au-email") A.form.email = e.target.value; else if (e.target.id === "au-pass") A.form.pass = e.target.value; });
+document.addEventListener("change", e => { const t = e.target; if (t.dataset && t.dataset.pref) setPref(t.dataset.pref, t.checked); });
 function boot() {
   if (A.user && A.user.uid === "sample") A.user = null;
   render();
-  if (A.user) loadAccounts();
-  setInterval(() => { if (!document.hidden && A.user && !A.sample && S.sec === "perf") loadAccounts(); else if (!document.hidden && A.user && S.sec === "perf") renderSync(currentAcct()); }, 5000);
+  if (A.user) { loadAccounts(); initNotif(true); }
+  setInterval(() => {
+    if (document.hidden || !A.user) return;
+    const fast = S.sec === "engine" || S.sec === "trades";
+    if (!A.sample) { if (fast || Date.now() - (A.lastLoad || 0) > 30000) { A.lastLoad = Date.now(); loadAccounts(); } }
+    else if (S.sec === "engine" || S.sec === "trades") renderSync(currentAcct());
+  }, 5000);
+  setInterval(() => { if (!document.hidden && A.user && S.sec === "engine" && A.accounts && !(document.activeElement && document.activeElement.matches("input,select"))) renderEngine(); }, 60000);
 }
 
-/* ---------- events ---------- */
+/* ---------- events for the news module ---------- */
 document.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   if (etClick(b)) return;
@@ -1145,7 +1414,6 @@ document.addEventListener("change", e => {
   }
 });
 
-/* ---------- data refresh ---------- */
 async function getJSON(url) { const c = new AbortController(), t = setTimeout(() => c.abort(), 15000); try { const r = await fetch(url, { signal: c.signal }); if (!r.ok) throw new Error(r.status); return await r.json(); } finally { clearTimeout(t); } }
 async function refreshFx() {
   const last = DATA.CROSS_ROWS[DATA.CROSS_ROWS.length - 1][0];
@@ -1170,7 +1438,7 @@ async function refreshSpot() {
   const price = +(j.spot_usd_oz ?? (j.xau && j.xau.price) ?? j.price);
   if (price > 0) { S.spot = { price, t: Date.now() }; store.set("spot", S.spot); }
 }
-function softRender() { if (A.user && (S.sec === "news" || S.sec === "account")) render(); }
+function softRender() { if (A.user && (S.sec === "news" || S.sec === "settings")) render(); }
 async function refresh(force) {
   const stale = t => force || Date.now() - (t || 0) > 3 * 3600000;
   S.status = { fx: "· updating…", gold: "· updating…" }; softRender();
@@ -1182,14 +1450,14 @@ async function refresh(force) {
   CROSSES = allRows(); computeBaseline(); softRender();
 }
 
+
 computeBaseline();
 boot();
 refresh(false);
-setInterval(() => { if (!document.hidden && A.user && S.sec === "news") { renderClock(); if (S.tab !== "series" && !(document.activeElement && document.activeElement.matches("input,select"))) renderNews(); } }, 30000);
+setInterval(() => { if (!document.hidden && A.user && S.sec === "news") { renderClock(); renderEaNews(); if (S.tab !== "series" && !(document.activeElement && document.activeElement.matches("input,select"))) renderNews(); } }, 30000);
 setInterval(() => { if (!document.hidden) refreshSpot().then(() => { if (A.user && S.sec === "news") renderClock(); }).catch(() => {}); }, 120000);
-let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (A.user && (S.sec === "perf" || (S.sec === "news" && S.tab === "series"))) render(); }, 200); });
-document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(false); });
+let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (A.user && (S.sec === "engine" || (S.sec === "news" && S.tab === "series"))) render(); }, 200); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { refresh(false); if (A.user && !A.sample) loadAccounts(); } });
 </script>
-
 </body>
 </html>
