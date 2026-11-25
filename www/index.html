@@ -237,6 +237,17 @@ button.wire-row:hover { background: var(--surface-2); }
 .likely { border-radius: 14px; padding: 14px 16px; }
 .likely.buy { background: var(--pos); color: #0d1a03; } .likely.sell { background: var(--neg); color: #22030a; }
 .likely .order { font-family: var(--f-display); font-size: 34px; font-weight: 800; line-height: 1.1; margin: 2px 0 6px; }
+.likely.flat { background: var(--surface-3); color: var(--fg); }
+.likely .conf { background: rgba(0,0,0,.18); } .likely .conf i { background: currentColor; }
+.conf { height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; margin-top: 6px; }
+.conf i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--ember), var(--ember-2)); }
+.meter { position: relative; height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--cool), var(--surface-3) 40%, var(--surface-3) 60%, var(--hot)); }
+.meter span { position: absolute; top: -5px; width: 6px; height: 22px; margin-left: -3px; border-radius: 3px; background: var(--fg); box-shadow: 0 0 0 2px var(--bg); }
+.why { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.why li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; font-size: 13.5px; align-items: start; }
+.ck { width: 20px; height: 20px; border-radius: 6px; display: grid; place-items: center; font-size: 12px; font-weight: 800; background: var(--surface-3); color: var(--muted); }
+.ck.ok { background: rgba(163,243,91,.15); color: var(--pos); } .ck.no { background: rgba(255,77,109,.15); color: var(--neg); }
+details summary { list-style: none; } details summary::-webkit-details-marker { display: none; }
 .prose p + p { margin-top: 8px; }
 .toggle { display: inline-flex; align-items: center; gap: 10px; }
 .toggle input { width: 20px; height: 20px; accent-color: var(--ember); }
@@ -303,7 +314,7 @@ const CORE = ["cpi", "nfp", "fomc", "ppi"];
 /* ---------- metrics: consensus vs actual ---------- */
 // dir: +1 when a higher number is hawkish (dollar-positive), -1 when lower is hawkish. tol: band counted as "in line".
 const TEMPLATES = {
-  cpi: [{ k: "core", name: "Core MoM", unit: "%", tol: 0.05, dir: 1 }, { k: "head", name: "Headline MoM", unit: "%", tol: 0.05, dir: 1 }],
+  cpi: [{ k: "core", name: "Core MoM", unit: "%", tol: 0.05, dir: 1 }, { k: "head", name: "Headline MoM", unit: "%", tol: 0.05, dir: 1 }, { k: "yoy", name: "Headline YoY", unit: "%", tol: 0.05, dir: 1 }],
   nfp: [{ k: "nfp", name: "Payrolls", unit: "k", tol: 25, dir: 1 }, { k: "ur", name: "Unemployment", unit: "%", tol: 0.05, dir: -1 }, { k: "ahe", name: "Hourly earnings MoM", unit: "%", tol: 0.05, dir: 1 }],
   fomc: [{ k: "rate", name: "Upper bound", unit: "%", tol: 0.01, dir: 1 }],
   ppi: [{ k: "fd", name: "Final demand MoM", unit: "%", tol: 0.05, dir: 1 }, { k: "core", name: "Core MoM", unit: "%", tol: 0.05, dir: 1 }],
@@ -341,31 +352,78 @@ const S = {
   gold: store.get("gold", { pts: [], fetched: 0 }),
   spot: store.get("spot", null),
   status: { fx: "", gold: "" },
+  cal: store.get("cal", {}),        // MT5 calendar figures from the EA: { releaseId: { line: { cons, act, prev } } }
+  calRel: store.get("calRel", []),  // releases the app only knows from the MT5 calendar (after the built-in list ends)
 };
+for (const r of S.calRel) if (!RELEASES.some(x => x.id === r.id)) RELEASES.push(r);
+RELEASES.sort((a, b) => (a.date + a.timeEt).localeCompare(b.date + b.timeEt));
 
+/* ---------- MT5 calendar figures sent by the EA (forecast / actual / previous) ---------- */
+const FAMMAP = { CPI: "cpi", NFP: "nfp", PPI: "ppi", FOMC: "fomc" };
+function calKey(fam, name) {
+  const u = String(name || "").toUpperCase(), mm = /M\/M|MOM|MONTH/.test(u), yy = /Y\/Y|YOY|YEAR/.test(u);
+  if (fam === "cpi") return /CORE/.test(u) ? (mm ? "core" : null) : yy ? "yoy" : mm ? "head" : null;
+  if (fam === "ppi") return /CORE/.test(u) ? (mm ? "core" : null) : yy ? null : mm ? "fd" : null;
+  if (fam === "nfp") return /NONFARM|NON-FARM/.test(u) && !/PRIVATE|ADP/.test(u) ? "nfp" : /UNEMPLOYMENT/.test(u) ? "ur" : /EARNINGS/.test(u) && mm ? "ahe" : null;
+  if (fam === "fomc") return /RATE|FUNDS/.test(u) ? "rate" : null;
+  return null;
+}
+const numOr = v => v == null || v === "" || isNaN(+v) ? null : +v;
+function etParts(t) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: ET, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).formatToParts(new Date(t)).map(x => [x.type, x.value]));
+  return { date: `${p.year}-${p.month}-${p.day}`, time: `${String(+p.hour % 24).padStart(2, "0")}:${p.minute}` };
+}
+// The EA sends US NFP, CPI, PPI and FOMC for the last 40 days and the next 14, with the broker's forecast,
+// actual and previous figures. They fill the Forecast / Actual table and are kept on the phone, so the
+// labelled history (and the track record below) grows every month by itself.
+function ingestCal(accs) {
+  let changed = false;
+  for (const acc of Object.values(accs || {})) for (const n of acc.news || []) {
+    const fam = FAMMAP[n.fam]; if (!fam || !FAM[fam]) continue;
+    const key = calKey(fam, n.name); if (!key) continue;
+    const t = n.t * 1000;
+    let r = RELEASES.find(x => x.family === fam && Math.abs(instant(x) - t) < 3 * 3600000);
+    if (!r) {
+      const d = etParts(t);
+      r = { id: `${fam}-${d.date}`, family: fam, date: d.date, timeEt: d.time, afterFix: fam === "fomc", title: FAM[fam].short === "NFP" ? "Employment" : FAM[fam].short, covers: "MT5 calendar" };
+      if (RELEASES.some(x => x.id === r.id)) continue;
+      RELEASES.push(r); S.calRel.push(r); changed = true;
+      RELEASES.sort((a, b) => (a.date + a.timeEt).localeCompare(b.date + b.timeEt));
+    }
+    const c = S.cal[r.id] = S.cal[r.id] || {}, m = c[key] = c[key] || {};
+    for (const [f, v] of [["cons", numOr(n.fc)], ["act", numOr(n.act)], ["prev", numOr(n.prev)]]) if (v != null && m[f] !== v) { m[f] = v; changed = true; }
+  }
+  if (changed) { store.set("cal", S.cal); store.set("calRel", S.calRel.slice(-150)); }
+  return changed;
+}
+
+// order: what you typed > your broker's MT5 calendar (sent by the EA) > figures built into the app
 function metricsFor(r) {
-  const known = KNOWN[r.id] || {};
+  const known = KNOWN[r.id] || {}, cal = (S.cal || {})[r.id] || {};
   const ed = S.edits[r.id] || {};
   const list = [];
   for (const [k, m] of Object.entries(known)) if (m && m.first) list.push(Object.assign({ k }, m));
-  for (const t of TEMPLATES[r.family] || []) list.push(Object.assign({}, t, known[t.k] || {}));
+  for (const t of TEMPLATES[r.family] || []) if (!list.some(x => x.k === t.k)) list.push(Object.assign({}, t, known[t.k] || {}));
   return list.map(m => {
-    const e = ed[m.k] || {};
-    return Object.assign({}, m, {
-      cons: e.cons !== undefined ? e.cons : (m.cons ?? null),
-      act: e.act !== undefined ? e.act : (m.act ?? null),
-    });
+    const e = ed[m.k] || {}, c = cal[m.k] || {};
+    const pick = f => e[f] !== undefined ? e[f] : c[f] != null ? c[f] : (m[f] ?? null);
+    return Object.assign({}, m, { cons: pick("cons"), act: pick("act"), prev: c.prev ?? null, mt5: c.cons != null || c.act != null });
   });
 }
+// Weighted surprise across every line that has both numbers. 1.0 = at the edge of "in line", 2+ = a big miss or beat.
+const WEIGHTS = { cpi: { core: 0.6, head: 0.3, yoy: 0.1 }, nfp: { nfp: 0.5, ahe: 0.3, ur: 0.2 }, ppi: { fd: 0.5, core: 0.5 }, fomc: { rate: 1 } };
+function surprise(r) {
+  const ms = metricsFor(r).filter(m => m.cons != null && m.act != null && !isNaN(m.cons) && !isNaN(m.act));
+  if (!ms.length) return null;
+  const w = WEIGHTS[r.family] || {};
+  let s = 0, sw = 0; const parts = [];
+  for (const m of ms) { const z = Math.max(-4, Math.min(4, (m.act - m.cons) * m.dir / (m.tol || 1))), wt = w[m.k] ?? 1; s += wt * z; sw += wt; parts.push({ name: m.name, z, wt }); }
+  const strong = parts.filter(x => Math.abs(x.z) >= 1);
+  return { score: s / sw, parts, mixed: strong.some(x => x.z > 0) && strong.some(x => x.z < 0) };
+}
 function autoLabel(r) {
-  for (const m of metricsFor(r)) {
-    if (m.cons == null || m.act == null || isNaN(m.cons) || isNaN(m.act)) continue;
-    const d = (m.act - m.cons) * m.dir;
-    if (d > m.tol) return "hot";
-    if (d < -m.tol) return "cool";
-    return "inline";
-  }
-  return null;
+  const sp = surprise(r); if (!sp) return null;
+  return sp.score >= 1 ? "hot" : sp.score <= -1 ? "cool" : "inline";
 }
 function labelFor(r) {
   const ed = S.edits[r.id] || {};
@@ -494,6 +552,167 @@ function scenarios(sm) {
   return { by, hot, cool, inline, read, usdRead };
 }
 
+/* ---------- deeper news analysis: context, track record, decision, risk ---------- */
+function pairSeries(p) { return p.gold ? (S.gold.pts || []).map(x => [x[0], x[1]]) : CROSSES.map(c => [c.date, px(c, p)]); }
+function idxBefore(sr, date) { let i = -1; for (let k = 0; k < sr.length; k++) { if (sr[k][0] < date) i = k; else break; } return i; }
+const chg = (sr, i, n) => i >= n && sr[i - n][1] ? sr[i][1] / sr[i - n][1] - 1 : null;
+function corr(a, b) {
+  const n = Math.min(a.length, b.length); if (n < 10) return null;
+  const ma = a.slice(0, n).reduce((x, y) => x + y, 0) / n, mb = b.slice(0, n).reduce((x, y) => x + y, 0) / n;
+  let sab = 0, saa = 0, sbb = 0; for (let i = 0; i < n; i++) { const da = a[i] - ma, db = b[i] - mb; sab += da * db; saa += da * da; sbb += db * db; }
+  return saa && sbb ? sab / Math.sqrt(saa * sbb) : null;
+}
+// in the units the app shows: pips for FX, dollars for gold
+const unitMove = (p, a, b) => p.gold ? b - a : (b - a) / p.pip;
+function context(r, p) {
+  const us = CROSSES.map(c => [c.date, basket(c)]), iu = idxBefore(us, r.date);
+  const ps = pairSeries(p), ip = idxBefore(ps, r.date);
+  const usd20 = chg(us, iu, 20), usd5 = chg(us, iu, 5), pair20 = chg(ps, ip, 20), pair5 = chg(ps, ip, 5);
+  // how big the dollar's 5-day run-up is versus the run-ups before past CPI / NFP / FOMC / PPI prints
+  const drifts = RELEASES.filter(x => CORE.includes(x.family) && x.date < r.date).map(x => chg(us, idxBefore(us, x.date), 5)).filter(v => v != null).map(Math.abs);
+  const driftPct = usd5 == null || drifts.length < 5 ? null : drifts.filter(v => v <= Math.abs(usd5)).length / drifts.length;
+  // daily range now versus normal, in pips / dollars
+  const absMv = (a, b) => { const o = []; for (let k = Math.max(1, a); k <= b; k++) o.push(Math.abs(unitMove(p, ps[k - 1][1], ps[k][1]))); return o; };
+  const volNow = ip >= 21 ? median(absMv(ip - 19, ip)) : null, volAll = ip >= 60 ? median(absMv(1, ip)) : null;
+  // gold against the dollar basket, last 60 common days
+  let gc = null;
+  if ((S.gold.pts || []).length > 30) {
+    const gm = new Map(S.gold.pts), common = us.filter(u => gm.has(u[0]) && u[0] < r.date).slice(-61);
+    if (common.length > 20) { const ur = [], gr = []; for (let k = 1; k < common.length; k++) { ur.push(common[k][1] / common[k - 1][1] - 1); gr.push(gm.get(common[k][0]) / gm.get(common[k - 1][0]) - 1); } gc = corr(ur, gr); }
+  }
+  const t = instant(r), near = RELEASES.filter(x => x.id !== r.id && Math.abs(instant(x) - t) <= 36 * 3600000 && ["cpi", "nfp", "fomc", "ppi", "pce", "retail"].includes(x.family));
+  return { usd20, usd5, pair20, pair5, driftPct, volNow, volAll, volRatio: volNow && volAll ? volNow / volAll : null, gc, near };
+}
+// How often a hot / cool label moved this instrument the expected way on past sessions
+function record(sm, p) {
+  let hotN = 0, hotOk = 0, coolN = 0, coolOk = 0; const okM = [], badM = [];
+  for (const o of sm.rows) {
+    const l = labelFor(o.r); if (l !== "hot" && l !== "cool") continue;
+    const d = l === "hot" ? 1 : -1, want = (p.gold || p.q) ? -d : d;
+    const v = p.gold ? (o.x.gold ? o.x.gold.usd : null) : o.x.pairs[p.id].pips;
+    if (v == null || v === 0) continue;
+    const ok = Math.sign(v) === want;
+    if (l === "hot") { hotN++; if (ok) hotOk++; } else { coolN++; if (ok) coolOk++; }
+    (ok ? okM : badM).push(Math.abs(v));
+  }
+  const n = hotN + coolN;
+  return { hotN, hotOk, coolN, coolOk, n, acc: n ? (hotOk + coolOk) / n : null, okMed: okM.length ? median(okM) : null, badMed: badM.length ? median(badM) : null };
+}
+// Scores a trade idea from 0 to 100. Every point is explained in "why".
+function decide(r, p, ctx, rec, usdDir, size, mixed) {
+  const pairDir = (p.gold || p.q) ? -usdDir : usdDir, why = [];
+  let sc = 50;
+  const add = (v, ok, text) => { sc += v; why.push({ ok, text }); };
+  if (size === "strong") add(20, true, "Big surprise: the figure is far from the forecast.");
+  else if (size === "mild") add(8, true, "Clear surprise, but not a big one.");
+  else if (size === "assumed") add(6, null, "Plan only: assumes a clear surprise in this direction.");
+  else add(-30, false, "Close to the forecast. In-line prints spike both ways and fade.");
+  if (mixed) add(-20, false, "The lines disagree (one hot, one cool). Mixed prints often reverse.");
+  if (rec.n >= 4) { const v = Math.round((rec.acc - 0.5) * 60); add(v, rec.acc >= 0.55 ? true : rec.acc < 0.45 ? false : null, `This call was right on ${Math.round(rec.acc * 100)}% of ${rec.n} labelled past sessions for ${p.label}.`); }
+  else why.push({ ok: null, text: `Only ${rec.n} labelled past session${rec.n === 1 ? "" : "s"} for ${p.label}: too few to judge the track record yet.` });
+  if (pairDir && ctx.pair20 != null && Math.abs(ctx.pair20) > (p.gold ? 0.01 : 0.004)) {
+    const td = Math.sign(ctx.pair20), w = td === pairDir;
+    add(w ? 10 : -10, w, `${p.label} is ${td > 0 ? "up" : "down"} ${pct(Math.abs(ctx.pair20), 1)} over 20 sessions: this trade goes ${w ? "with" : "against"} the trend.`);
+  }
+  if (usdDir && ctx.usd5 != null && ctx.driftPct != null) {
+    const same = Math.sign(ctx.usd5) === usdDir;
+    if (same && ctx.driftPct >= 0.75) add(-10, false, `The dollar already moved ${pct(ctx.usd5)} in the 5 days before (bigger than ${Math.round(ctx.driftPct * 100)}% of past run-ups): much may be priced in.`);
+    else if (!same && ctx.driftPct >= 0.5) add(5, true, "The dollar drifted the other way before the print, so there is room to run.");
+  }
+  if (p.gold && ctx.gc != null) {
+    if (ctx.gc > -0.1) add(-10, false, `Gold has not been moving against the dollar lately (60-day correlation ${ctx.gc.toFixed(2)}). The usual gold read is weaker.`);
+    else if (ctx.gc < -0.4) add(5, true, `Gold is moving against the dollar as usual (60-day correlation ${ctx.gc.toFixed(2)}).`);
+  }
+  if (ctx.near.length) add(-8, false, `Other big release${ctx.near.length > 1 ? "s" : ""} within 36 hours: ${[...new Set(ctx.near.map(x => FAM[x.family].short))].join(", ")}. The first move can be undone.`);
+  if (ctx.volRatio != null && ctx.volRatio > 1.5) add(-5, false, `${p.label} is moving ${ctx.volRatio.toFixed(1)}× its normal daily range. Use smaller size.`);
+  sc = Math.max(0, Math.min(100, Math.round(sc)));
+  return { score: sc, verdict: !usdDir ? "none" : sc >= 65 ? "trade" : sc >= 50 ? "wait" : "none", pairDir, why };
+}
+function riskPlan(p, sm, ctx) {
+  const mv = sm.rows.map(o => p.gold ? (o.x.gold ? Math.abs(o.x.gold.usd) : null) : Math.abs(o.x.pairs[p.id].pips)).filter(v => v != null && v > 0);
+  if (mv.length < 3) return null;
+  const med = median(mv), big = q(mv, 0.8), normal = ctx.volNow;
+  const stop = Math.max(normal ? normal * 1.2 : 0, med * 0.6);
+  return { med, big, normal, stop, t1: med * 0.6, t2: med, rr: stop ? med / stop : null, n: mv.length };
+}
+const RULES = {
+  cpi: ["Trade core month-on-month first. If headline and core disagree, follow core.", "A 0.1 point miss on core is already a real surprise."],
+  nfp: ["Payrolls and hourly earnings must point the same way. If they disagree, skip the trade.", "Revisions to the last two months can flip the first move. Read them before entering."],
+  fomc: ["The decision is at 14:00 ET, the press conference 30 minutes later. The press conference often reverses the first move: wait for it.", "Read the dots on projection meetings. A hold with higher dots is hawkish."],
+  ppi: ["PPI moves price only when it changes the inflation picture. If CPI came out the same week, the PPI move is usually smaller.", "Trade final demand and core together."],
+};
+function analysisCards(r, p, sm, st) {
+  const ctx = context(r, p), rec = record(sm, p), plan = riskPlan(p, sm, ctx), sp = surprise(r), lab = labelFor(r);
+  const units = v => moveTxt(p, v);
+  const tick = ok => ok === true ? `<span class="ck ok">✓</span>` : ok === false ? `<span class="ck no">✗</span>` : `<span class="ck">•</span>`;
+  const whyList = list => `<ul class="why">${list.map(w => `<li>${tick(w.ok)}<span>${esc(w.text)}</span></li>`).join("")}</ul>`;
+  const sideOf = d => d > 0 ? "Buy" : "Sell";
+  const confBar = v => `<div class="conf"><i style="width:${v}%"></i></div>`;
+  // 1. surprise meter
+  let meter;
+  if (sp) {
+    const s = sp.score, posPct = (Math.max(-4, Math.min(4, s)) + 4) / 8 * 100;
+    const word = s >= 2 ? "Strong hawkish surprise" : s >= 1 ? "Hawkish surprise" : s <= -2 ? "Strong dovish surprise" : s <= -1 ? "Dovish surprise" : "In line with the forecast";
+    meter = `<div class="card" style="display:grid;gap:10px"><div class="row" style="justify-content:space-between"><h3>Surprise meter</h3><span class="label ${s >= 1 ? "hot" : s <= -1 ? "cool" : "inline"}">${esc(word)}</span></div>
+      <div class="meter"><span style="left:${posPct.toFixed(1)}%"></span></div>
+      <div class="row note" style="justify-content:space-between"><span>Dovish −4</span><span>In line</span><span>Hawkish +4</span></div>
+      <div class="note num">Score ${s > 0 ? "+" : ""}${s.toFixed(2)} · ${sp.parts.map(x => `${esc(x.name)} ${x.z > 0 ? "+" : ""}${x.z.toFixed(1)}`).join(" · ")}${sp.mixed ? " · <b style=\"color:var(--ember-2)\">mixed</b>" : ""}</div>
+      <p class="note">Each line is scored by how far the actual is from the forecast, weighted by how much the market cares about it (for CPI: core first).</p></div>`;
+  } else meter = `<div class="card" style="display:grid;gap:6px"><h3>Surprise meter</h3><p class="muted">Waiting for the figure. When DarkEngine is running in MT5, your broker's calendar fills the forecast and the actual here by itself within seconds of the release.</p></div>`;
+  // 2. decision
+  let decision;
+  if (lab) {
+    const s = sp ? sp.score : lab === "hot" ? 2 : lab === "cool" ? -2 : 0, usdDir = Math.abs(s) < 1 ? 0 : Math.sign(s);
+    const d = decide(r, p, ctx, rec, usdDir, Math.abs(s) >= 2 ? "strong" : Math.abs(s) >= 1 ? "mild" : "none", sp ? sp.mixed : false);
+    const head = d.verdict === "trade" ? `${sideOf(d.pairDir)} ${esc(p.label)}` : d.verdict === "wait" ? `${sideOf(d.pairDir)} ${esc(p.label)} only on confirmation` : "No trade";
+    const klass = d.verdict === "none" ? "flat" : d.pairDir > 0 ? "buy" : "sell";
+    decision = `<div class="card" style="display:grid;gap:12px"><div class="row" style="justify-content:space-between"><h3>Trade decision</h3><span class="badge ${d.verdict === "trade" ? "pos" : d.verdict === "wait" ? "ember" : ""}">${d.verdict === "trade" ? "Trade" : d.verdict === "wait" ? "Wait" : "Stand aside"}</span></div>
+      <div class="likely ${klass}"><div class="eyebrow" style="color:inherit;opacity:.8">After the print</div><div class="order">${head}</div>
+        <div class="row num" style="gap:8px">Confidence ${d.score}%</div>${confBar(d.score)}</div>
+      ${whyList(d.why)}
+      <p class="note">${d.verdict === "trade" ? "Enter only after the first 15-minute candle after the release closes in this direction." : d.verdict === "wait" ? "The odds are only slightly in favour. Wait for the first 15-minute candle to close in this direction, use half your normal risk." : "When the signals do not line up, the best trade is no trade."}</p></div>`;
+  } else {
+    const hot = decide(r, p, ctx, rec, 1, "assumed", false), cool = decide(r, p, ctx, rec, -1, "assumed", false);
+    const cell = (title, d, klass) => `<div class="${klass}"><div class="eyebrow">${title}</div><div class="big">${d.pairDir ? sideOf(d.pairDir) : "No trade"}</div>${d.pairDir ? `<div class="note num">Confidence ${d.score}%</div>${confBar(d.score)}` : `<div class="note">The spike usually fades</div>`}</div>`;
+    const better = hot.score === cool.score ? null : hot.score > cool.score ? "hot" : "cool";
+    decision = `<div class="card" style="display:grid;gap:12px"><div class="row" style="justify-content:space-between"><h3>Trade plan for ${esc(p.label)}</h3><span class="badge">${st === "live" ? "Waiting for the figure" : "Before the print"}</span></div>
+      <div class="scen">${cell("If hot (hawkish)", hot, "hot-c")}${cell("If in line", { pairDir: 0, score: 0 }, "")}${cell("If cool (dovish)", cool, "cool-c")}</div>
+      <p class="note">${better ? `<b style="color:var(--fg)">A ${better} print gives the better trade</b>: it fits the trend, the run-up and the track record best. Trade the other outcome only with a big surprise.` : "Both outcomes score the same: trade only a big surprise."}</p>
+      <details><summary class="note" style="cursor:pointer">Why these scores</summary><div style="display:grid;gap:8px;margin-top:8px"><b class="note" style="color:var(--fg)">If hot</b>${whyList(hot.why)}<b class="note" style="color:var(--fg)">If cool</b>${whyList(cool.why)}</div></details>
+      <p class="note">Do not hold a new trade into the release. DarkEngine pauses USD symbols from 30 minutes before to 30 minutes after.</p></div>`;
+  }
+  // 3. market context
+  const st2 = (k, v, s, c) => `<div class="card stat"><div class="eyebrow">${k}</div><div class="v num ${c || ""}">${v}</div><div class="s">${s}</div></div>`;
+  const ctxHtml = `<div class="card" style="display:grid;gap:10px"><h3>Market going into the print</h3><div class="grid2">
+      ${st2("Dollar, 20 sessions", ctx.usd20 == null ? "—" : pct(ctx.usd20), "Trend of the dollar basket", ctx.usd20 == null ? "" : cls(ctx.usd20))}
+      ${st2("Dollar, 5 days before", ctx.usd5 == null ? "—" : pct(ctx.usd5), ctx.driftPct == null ? "Run-up into the print" : `Bigger than ${Math.round(ctx.driftPct * 100)}% of past run-ups`, ctx.usd5 == null ? "" : cls(ctx.usd5))}
+      ${st2(esc(p.label) + ", 20 sessions", ctx.pair20 == null ? "—" : pct(ctx.pair20), ctx.pair20 == null ? "Loads when online" : ctx.pair20 > 0 ? "Uptrend" : "Downtrend", ctx.pair20 == null ? "" : cls(ctx.pair20))}
+      ${st2("Daily range now", ctx.volRatio == null ? "—" : ctx.volRatio.toFixed(1) + "×", ctx.volNow == null ? "Versus normal" : `${units(ctx.volNow).replace(/^\+/, "")} a day vs ${units(ctx.volAll).replace(/^\+/, "")} normal`)}
+      ${st2("Gold vs dollar", ctx.gc == null ? "—" : ctx.gc.toFixed(2), "60-day correlation. Below −0.4 = gold falls when the dollar rises")}
+      ${st2("Other big news", ctx.near.length ? String(ctx.near.length) : "None", ctx.near.length ? [...new Set(ctx.near.map(x => FAM[x.family].short))].join(", ") + " within 36h" : "Nothing else within 36 hours")}
+    </div></div>`;
+  // 4. track record
+  const recHtml = `<div class="card" style="display:grid;gap:10px"><h3>Track record for ${esc(p.label)}</h3>
+    ${rec.n ? `<div class="grid2">
+      ${st2("Hot calls right", rec.hotN ? `${rec.hotOk}/${rec.hotN}` : "—", rec.hotN ? `${Math.round(rec.hotOk / rec.hotN * 100)}% moved the expected way` : "No hot sessions yet")}
+      ${st2("Cool calls right", rec.coolN ? `${rec.coolOk}/${rec.coolN}` : "—", rec.coolN ? `${Math.round(rec.coolOk / rec.coolN * 100)}% moved the expected way` : "No cool sessions yet")}
+      ${st2("Move when right", rec.okMed == null ? "—" : units(rec.okMed).replace(/^\+/, ""), "Median day")}
+      ${st2("Move when wrong", rec.badMed == null ? "—" : units(rec.badMed).replace(/^\+/, ""), "Median day against you")}</div>` : ""}
+    <p class="note">${rec.n < 4 ? "Few labelled sessions so far. Every new release the EA sends is labelled and kept, so this fills in month by month. " : ""}${sm.pooled ? "Pooled across CPI, NFP, FOMC and PPI because this release has few sessions on the tape." : ""} Daily close-to-close, not the first-minute spike.</p></div>`;
+  // 5. risk plan
+  const riskHtml = plan ? `<div class="card" style="display:grid;gap:10px"><h3>Risk plan</h3><div class="grid2">
+      ${st2("Typical news day", units(plan.med).replace(/^\+/, ""), `Median of ${plan.n} sessions`)}
+      ${st2("Big news day", units(plan.big).replace(/^\+/, ""), "1 in 5 sessions moves this much")}
+      ${st2("Stop at least", units(plan.stop).replace(/^\+/, ""), "Beyond normal noise")}
+      ${st2("Targets", `${units(plan.t1).replace(/^\+/, "")} / ${units(plan.t2).replace(/^\+/, "")}`, plan.rr ? `Take half at the first. Reward:risk ${plan.rr.toFixed(1)}` : "Take half at the first")}</div>
+      <p class="note">${ctx.volRatio != null && ctx.volRatio > 1.3 ? "<b style=\"color:var(--ember-2)\">Volatile market: use half your normal risk.</b> " : "Use at most your normal risk, half if the decision says Wait. "}Spreads widen at the release: skip the trade if the spread is more than three times normal. Sizes come from daily closes, so treat them as a guide, not exact levels.</p></div>`
+    : `<div class="card"><h3>Risk plan</h3><p class="muted" style="margin-top:6px">Not enough measured sessions for ${esc(p.label)} yet.${p.gold ? " Gold history loads when the app is online." : ""}</p></div>`;
+  // 6. rules
+  const rules = (RULES[r.family] || []).concat(["Never enter in the first minute. Wait for the first 15-minute candle after the release to close.", "If price breaks back through the other end of that candle, the move has failed: get out.", "One news trade per release. Do not add to a loser."]);
+  const rulesHtml = `<div class="card prose"><h3>Before you trade ${esc(FAM[r.family].short)}</h3><ul class="why" style="margin-top:8px">${rules.map(x => `<li>${tick(null)}<span>${esc(x)}</span></li>`).join("")}</ul></div>`;
+  return meter + decision + ctxHtml + recHtml + riskHtml + rulesHtml;
+}
+
 /* ---------- formatting ---------- */
 const pct = (v, d = 2) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v * 100).toFixed(d) + "%";
 const sgn = (v, d = 0) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d);
@@ -561,7 +780,7 @@ function viewBrief() {
   </div>`;
   const metrics = metricsFor(r);
   const mRows = metrics.map(m => `<tr>
-      <td>${esc(m.name)}${m.unit ? ` <span class="note">${esc(m.unit)}</span>` : ""}</td>
+      <td>${esc(m.name)}${m.unit ? ` <span class="note">${esc(m.unit)}</span>` : ""}${m.prev != null ? `<div class="note num">prev ${esc(m.prev)}${esc(m.unit === "k" ? "k" : m.unit)}</div>` : ""}</td>
       <td class="r"><input class="field" inputmode="decimal" id="c-${r.id}-${m.k}" data-r="${r.id}" data-k="${m.k}" data-f="cons" value="${m.cons ?? ""}" placeholder="—" aria-label="${esc(m.name)} forecast"></td>
       <td class="r"><input class="field" inputmode="decimal" id="a-${r.id}-${m.k}" data-r="${r.id}" data-k="${m.k}" data-f="act" value="${m.act ?? ""}" placeholder="—" aria-label="${esc(m.name)} actual"></td>
       <td class="r num">${m.cons != null && m.act != null ? `<span class="${cls((m.act - m.cons) * m.dir)}">${sgn(m.act - m.cons, m.unit === "k" ? 0 : 2)}</span>` : "—"}</td></tr>`).join("");
@@ -614,9 +833,12 @@ function viewBrief() {
         <option value="auto"${ed === "auto" ? " selected" : ""}>Auto</option><option value="hot"${ed === "hot" ? " selected" : ""}>Hot</option>
         <option value="inline"${ed === "inline" ? " selected" : ""}>In line</option><option value="cool"${ed === "cool" ? " selected" : ""}>Cool</option></select></label></div>
     ${metrics.length ? `<div class="tbl"><table><thead><tr><th>Line</th><th class="r">Forecast</th><th class="r">Actual</th><th class="r">Diff</th></tr></thead><tbody>${mRows}</tbody></table></div>` : `<p class="muted">Minutes have no number to beat. Set the label by hand after you read them.</p>`}
+    ${metrics.some(m => m.mt5) ? `<p class="note"><span class="badge cool">MT5 calendar</span> Forecast and actual filled from your broker's calendar by DarkEngine. Type over them to change.</p>` : ""}
     <div class="row">${verdict}</div>
-    <p class="note">Hot means hawkish for the dollar: ${esc(f.hawkish)} The first line with both numbers sets the label.</p>
+    <p class="note">Hot means hawkish for the dollar: ${esc(f.hawkish)} The label comes from the surprise meter below, all lines weighted.</p>
   </div>
+
+  ${analysisCards(r, p, sm, st)}
 
   <div class="grid2">
     <div class="card stat"><div class="eyebrow">Sessions</div><div class="v num">${sm.n}</div><div class="s">${sm.pooled ? "Pooled CPI, NFP, FOMC, PPI" : esc(f.short) + " sessions on the tape"}</div></div>
@@ -749,11 +971,11 @@ function renderNews() {
 /* =====================================================================
    DarkEngine: accounts, period results, trades, notifications, PDF, world news
    ===================================================================== */
-// Firebase project of the app. The DarkEngine V2.0 EA writes to the same database.
+// Firebase project of the app. The DarkEngine V2.1 EA writes to the same database.
 const FB = { apiKey: "AIzaSyBUsA_mZf0_wMqrL0sOzPrc5mhH4EksD90", project: "eagletracker-ca2ff", db: "https://firestore.googleapis.com" };
 const FB_READY = /^AIza/.test(FB.apiKey) && /^https:\/\//.test(FB.db);
-const EA = "DarkEngine V2.0";
-const APP_VER = "4.0";
+const EA = "DarkEngine V2.1";
+const APP_VER = "4.1";
 const MARK = document.querySelector(".mark") ? document.querySelector(".mark").innerHTML : "";
 const $ = id => document.getElementById(id);
 const A = {
@@ -811,7 +1033,7 @@ async function token() {
   A.user.idToken = j.id_token; A.user.refreshToken = j.refresh_token; A.user.exp = Date.now() + (Number(j.expires_in || 3600) - 90) * 1000; store.set("auth", A.user);
   return A.user.idToken;
 }
-function signOut() { A.user = null; A.accounts = null; A.sample = false; A.sig = ""; store.set("auth", null); runner("clearAuth"); render(); }
+function signOut() { A.user = null; A.accounts = null; A.sample = false; A.sig = ""; store.set("auth", null); runner("clearAuth"); liveSync(); render(); }
 async function submitAuth() {
   if (A.busy) return;
   const email = A.form.email.trim(), pass = A.form.pass;
@@ -832,7 +1054,7 @@ function renderAuth() {
     <div class="hero-mark" aria-hidden="true">${MARK}</div>
     <div><div class="word" style="font-size:15px;margin-bottom:10px">DARK<b>ENGINE</b></div>
       <h1>${up ? "Start your engine" : reset ? "Reset your password" : "Welcome back"}</h1>
-      <p class="muted" style="margin-top:8px">${up ? "Watch DarkEngine V2.0 trade your MT5 accounts: day, week and month results, every trade, and alerts on your phone." : reset ? "We will email you a link to choose a new password." : "Sign in to see what your engine is doing."}</p></div>
+      <p class="muted" style="margin-top:8px">${up ? "Watch DarkEngine trade your MT5 accounts: day, week and month results, every trade, and alerts on your phone." : reset ? "We will email you a link to choose a new password." : "Sign in to see what your engine is doing."}</p></div>
     <form id="authform" novalidate>
       <label for="au-email">Email<input class="input" id="au-email" type="email" autocomplete="email" inputmode="email" value="${esc(A.form.email)}" placeholder="you@example.com"></label>
       ${reset ? "" : `<label for="au-pass">Password<input class="input" id="au-pass" type="password" autocomplete="${up ? "new-password" : "current-password"}" value="${esc(A.form.pass)}" placeholder="At least 6 characters"></label>`}
@@ -849,7 +1071,7 @@ function renderAuth() {
 
 /* ---------- notifications: in-app + Android system tray ---------- */
 const RUNNER = "com.darkengine.app.check";
-const NOTIF = { prefs: Object.assign({ trades: true, news: true, lead: 15 }, store.get("notif", {})), perm: "unknown", seen: new Set(store.get("seen", [])), exact: null };
+const NOTIF = { prefs: Object.assign({ trades: true, news: true, results: true, lead: 15, live: true, every: 10 }, store.get("notif", {})), perm: "unknown", seen: new Set(store.get("seen", [])), exact: null, live: false, liveSt: null, liveErr: "" };
 const isNative = () => { const c = window.Capacitor; return !!(c && c.isNativePlatform && c.isNativePlatform()); };
 function nat(plugin, method, opts) { const c = window.Capacitor; return c.nativePromise ? c.nativePromise(plugin, method, opts || {}) : c.Plugins[plugin][method](opts || {}); }
 // same hash as runners/background.js, so the app and the background check never post the same alert twice
@@ -864,8 +1086,26 @@ async function initNotif(ask) {
   try { NOTIF.exact = (await nat("LocalNotifications", "checkExactNotificationSetting")).exact_alarm; } catch (e) {}
   const st = await runner("getState");
   if (st && Array.isArray(st.seen)) { st.seen.forEach(x => NOTIF.seen.add(+x)); saveSeen(); }
+  await liveSync();
   pushAuth();
   renderBell();
+}
+// Live mode: a small background service (DarkWatch) checks the accounts every few seconds, so alerts come
+// at once even with the app closed. Off = Android's 15-minute background check only.
+async function liveSync() {
+  if (!isNative()) return;
+  try {
+    if (!A.user || A.sample || !NOTIF.prefs.live) { NOTIF.live = false; NOTIF.liveSt = await nat("DarkWatch", "stop"); }
+    else {
+      NOTIF.liveSt = await nat("DarkWatch", "start", { apiKey: FB.apiKey, project: FB.project, uid: A.user.uid, refreshToken: A.user.refreshToken, prefs: NOTIF.prefs, interval: NOTIF.prefs.every });
+      NOTIF.live = true; NOTIF.liveErr = "";
+    }
+  } catch (e) { NOTIF.live = false; NOTIF.liveErr = (e && e.message) || "Live mode is not available in this build."; }
+}
+async function liveStatus() {
+  if (!isNative()) return;
+  try { NOTIF.liveSt = await nat("DarkWatch", "status"); } catch (e) {}
+  if (S.sec === "settings") render();
 }
 async function askPermission() {
   if (!isNative()) { toast("Alerts work in the Android app."); return; }
@@ -874,7 +1114,7 @@ async function askPermission() {
 }
 function pushAuth() {
   if (!A.user || A.sample) return runner("clearAuth");
-  return runner("saveAuth", { apiKey: FB.apiKey, project: FB.project, uid: A.user.uid, refreshToken: A.user.refreshToken, prefs: NOTIF.prefs });
+  return runner("saveAuth", { apiKey: FB.apiKey, project: FB.project, uid: A.user.uid, refreshToken: A.user.refreshToken, prefs: NOTIF.prefs, live: NOTIF.live });
 }
 function renderBell() { const d = $("belldot"); if (d) d.hidden = !(isNative() && NOTIF.perm !== "granted"); }
 async function postNow(list) {
@@ -897,18 +1137,26 @@ async function processAlerts(accs) {
       NOTIF.seen.add(id); marked.push(id);
       if (!first && p.t && now - p.t * 1000 < 6 * 3600000) { fresh.push(p); if (NOTIF.prefs.trades) post.push({ id, ...tradeText(p, acc), extra: { kind: "trade" } }); }
     }
-    if (!NOTIF.prefs.news) continue;
     for (const n of acc.news || []) {
+      // a figure that has just come out: actual vs forecast and what it means
+      if (NOTIF.prefs.results && n.act != null && n.t * 1000 <= now && now - n.t * 1000 < 3 * 3600000) {
+        const rid = hid("res:" + n.t + ":" + n.cur + ":" + n.name);
+        if (!done.has(rid)) { done.add(rid); if (!NOTIF.seen.has(rid)) { NOTIF.seen.add(rid); marked.push(rid); if (!first) { const v = newsVerdict(n); post.push({ id: rid, title: `${n.fam || n.cur} ${v ? LABEL_TEXT[v].toUpperCase() : "out"}: ${n.name}`, body: `Actual ${fmtN(n.act, n.u)}${n.fc != null ? " vs forecast " + fmtN(n.fc, n.u) : ""}. ${v ? VERDICT_TXT[v] : ""}`, extra: { kind: "result" } }); fresh.push({ news: n, v }); } } }
+      }
+      if (!NOTIF.prefs.news) continue;
       const id = hid("news:" + n.t + ":" + n.cur + ":" + n.name), at = n.t * 1000 - NOTIF.prefs.lead * 60000;
-      if (done.has(id) || n.t * 1000 <= now) continue; done.add(id);
-      const txt = { title: `${n.cur} news in ${at > now ? NOTIF.prefs.lead + " min" : left(n.t * 1000 - now)}`, body: `${n.name} at ${tzTime(n.t, tzOf(acc))} ${tzLbl(tzOf(acc))}. DarkEngine pauses new ${n.cur} trades around it.`, extra: { kind: "news" } };
+      if (done.has(id) || n.t * 1000 <= now || n.t * 1000 - now > 2 * 86400000) continue; done.add(id);
+      const txt = { title: `${n.fam || n.cur} in ${at > now ? NOTIF.prefs.lead + " min" : left(n.t * 1000 - now)}: ${n.name}`, body: `At ${tzTime(n.t, tzOf(acc))} ${tzLbl(tzOf(acc))}.${n.fc != null ? " Forecast " + fmtN(n.fc, n.u) + "." : ""} DarkEngine pauses new USD trades 30 min before and after.`, extra: { kind: "news" } };
       if (at > now) { later.push({ id, ...txt, schedule: { at: new Date(at).toISOString(), allowWhileIdle: true } }); if (!NOTIF.seen.has(id)) { NOTIF.seen.add(id); marked.push(id); } }
       else if (!NOTIF.seen.has(id)) { NOTIF.seen.add(id); marked.push(id); post.push({ id, ...txt }); }
     }
   }
   store.set("alertsInit", true);
-  if (fresh.length) toast(fresh.length === 1 ? `New trade: ${fresh[0].side.toUpperCase()} ${fresh[0].sym} ${(+fresh[0].vol).toFixed(2)}` : `${fresh.length} new trades opened`, "trade");
+  const trades = fresh.filter(x => !x.news), res = fresh.filter(x => x.news);
+  if (trades.length) toast(trades.length === 1 ? `New trade: ${trades[0].side.toUpperCase()} ${trades[0].sym} ${(+trades[0].vol).toFixed(2)}` : `${trades.length} new trades opened`, "trade");
+  else if (res.length) toast(`${res[0].news.fam || "USD"} ${res[0].v ? LABEL_TEXT[res[0].v] : "out"}: actual ${fmtN(res[0].news.act, res[0].news.u)}${res[0].news.fc != null ? " vs " + fmtN(res[0].news.fc, res[0].news.u) : ""}`, "trade");
   if (marked.length) { saveSeen(); runner("markSeen", { ids: marked }); }
+  if (NOTIF.live) return;          // live mode: the background service already posts these at once
   await postNow(post);
   if (later.length && isNative() && NOTIF.perm === "granted") { try { await nat("LocalNotifications", "schedule", { notifications: later.map(n => ({ ...n, channelId: "de_alerts", smallIcon: "ic_stat_de", iconColor: "#FF6A1A", autoCancel: true })) }); } catch (e) {} }
 }
@@ -917,7 +1165,8 @@ async function cancelNews() {
   try { const p = await nat("LocalNotifications", "getPending"); const ids = (p.notifications || []).filter(n => n.extra && n.extra.kind === "news").map(n => ({ id: n.id })); if (ids.length) await nat("LocalNotifications", "cancel", { notifications: ids }); } catch (e) {}
 }
 async function setPref(k, v) {
-  NOTIF.prefs[k] = v; store.set("notif", NOTIF.prefs); pushAuth();
+  NOTIF.prefs[k] = v; store.set("notif", NOTIF.prefs); await liveSync(); pushAuth();
+  if (NOTIF.live) await cancelNews();
   if (k === "news" || k === "lead") { await cancelNews(); if (A.accounts && NOTIF.prefs.news) { const keep = NOTIF.seen; for (const acc of Object.values(A.accounts)) for (const n of acc.news || []) keep.delete(hid("news:" + n.t + ":" + n.cur + ":" + n.name)); processAlerts(A.accounts); } }
   render();
 }
@@ -925,7 +1174,9 @@ async function testAlert() {
   if (!isNative()) { toast("Test alerts work in the Android app."); return; }
   if (NOTIF.perm !== "granted") await askPermission();
   if (NOTIF.perm !== "granted") { toast("Alerts are blocked. Allow them in Android settings."); return; }
+  const wasLive = NOTIF.live; NOTIF.live = false;
   await postNow([{ id: 7, title: "DarkEngine BUY XAUUSD", body: "Test alert: this is how a new trade shows on your phone." }]);
+  NOTIF.live = wasLive;
   toast("Test alert sent");
 }
 
@@ -938,6 +1189,8 @@ async function loadAccounts() {
     if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? "The database refused the request. Sign out and in again." : "Could not load your accounts.");
     const j = (await r.json()) || {}, out = {};
     for (const d of j.documents || []) { try { const v = JSON.parse(d.fields.json.stringValue); out[String(v.login || d.name.split("/").pop())] = v; } catch (e) {} }
+    const calNew = ingestCal(out);
+    if (calNew && S.sec === "news" && !(document.activeElement && document.activeElement.matches("input,select"))) renderNews();
     const sig = JSON.stringify(out);
     if (sig === A.sig && A.accounts) { A.loadErr = ""; if (S.sec === "engine" || S.sec === "trades") renderSync(currentAcct()); return; }
     A.sig = sig; A.accounts = out; A.loadErr = "";
@@ -973,7 +1226,7 @@ function sampleAccounts() {
     day: per(today, [today], closeOf(today), false), prevDay: per(prev, [prev], closeOf(prev), true),
     week: per(wk, ks.filter(k => mon(k) === wk), closeOf(wk) + 6 * 86400, false), prevWeek: per(pwk, ks.filter(k => mon(k) === pwk), closeOf(pwk) + 6 * 86400, true),
     month: per(mo, ks.filter(k => k.startsWith(mo)), mClose(mo), false), prevMonth: per(pmo, ks.filter(k => k.startsWith(pmo)), mClose(pmo), true) };
-  const news = [[95, "USD", "Initial Jobless Claims", 3], [260, "EUR", "ECB President Speech", 3], [610, "USD", "FOMC Meeting Minutes", 3], [1300, "GBP", "BoE Rate Statement", 3]].map(([m, cur, name, imp]) => ({ t: nowS + m * 60, cur, name, imp }));
+  const news = [[-40, "CPI", "Core CPI m/m", 0.2, 0.3, 0.2], [-40, "CPI", "CPI m/m", 0.3, 0.4, 0.3], [95, "PPI", "PPI m/m", 0.2], [610, "FOMC", "Fed Interest Rate Decision", 4.0], [1300, "NFP", "Nonfarm Payrolls", 150]].map(([m, fam, name, fc, act, prev]) => ({ t: nowS + m * 60, cur: "USD", name, imp: 3, fam, u: fam === "NFP" ? "k" : "%", fc, ...(act != null ? { act } : {}), ...(prev != null ? { prev } : {}) }));
   return { "52001234": { v: 2, login: 52001234, server: "Exness-MT5Real8", broker: "Exness Technologies Ltd", name: "Sample account", currency: "USD", leverage: 500, demo: false,
     balance: +bal.toFixed(2), equity: +(bal + 61.2).toFixed(2), margin: 121.5, floating: 61.2, updated: nowS - 25, today,
     charts: [{ name: EA, sym: "XAUUSD", tf: "H1" }], scan: syms, window: 100, newsFilter: true, newsPause: "",
@@ -1143,21 +1396,34 @@ function renderTrades() {
 }
 
 /* ---------- News from the EA (top of the News tab) ---------- */
-const USD_LIKE = /XAU|XAG|GOLD|SILVER|US30|US100|US500|NAS|SPX|DJ|USTEC|WTI|OIL|BTC|ETH/i;
-function affected(cur, scan) { return (scan || []).filter(s => s.toUpperCase().includes(cur) || (cur === "USD" && USD_LIKE.test(s))); }
+// The EA pauses only USD symbols (USD in the name, plus gold and silver) around US NFP, CPI, PPI and FOMC.
+const usdSyms = scan => (scan || []).filter(s => /USD|XAU|XAG|GOLD|SILVER/i.test(s));
+const fmtN = (v, u) => v == null ? "—" : (Math.round(v * 100) / 100) + (u === "%" ? "%" : u === "k" ? "K" : "");
+const VERDICT_TXT = { hot: "Hotter than expected: dollar up, gold and EUR/GBP usually down.", cool: "Cooler than expected: dollar down, gold and EUR/GBP usually up.", inline: "In line with the forecast: expect a two-way spike that fades. Usually no trade." };
+function newsVerdict(n) {
+  if (n.act == null || n.fc == null) return null;
+  const fam = FAMMAP[n.fam], k = fam && calKey(fam, n.name), tpl = ((TEMPLATES[fam] || []).find(x => x.k === k)) || { tol: /UNEMPLOYMENT/i.test(n.name) ? 0.05 : 0.05, dir: /UNEMPLOYMENT/i.test(n.name) ? -1 : 1 };
+  const d = (n.act - n.fc) * tpl.dir;
+  return d > tpl.tol ? "hot" : d < -tpl.tol ? "cool" : "inline";
+}
 function renderEaNews() {
   const el = $("eanews"), acc = A.accounts ? currentAcct() : null;
   if (!acc) { el.innerHTML = ""; return; }
-  const tz = tzOf(acc), now = Date.now() / 1000, list = (acc.news || []).slice().sort((a, b) => a.t - b.t);
+  const tz = tzOf(acc), now = Date.now() / 1000, all = (acc.news || []).slice().sort((a, b) => a.t - b.t);
+  const list = all.filter(n => n.t >= now - 3600 && n.t <= now + 86400), outs = all.filter(n => n.act != null && n.t < now && n.t > now - 7 * 86400 && n.t < now - 3600).reverse();
+  const aff = usdSyms(acc.scan);
+  const fig = n => n.fc != null || n.act != null || n.prev != null ? `<div class="note num">${n.act != null ? `Actual <b style="color:var(--fg)">${fmtN(n.act, n.u)}</b> · ` : ""}Forecast ${fmtN(n.fc, n.u)} · Previous ${fmtN(n.prev, n.u)}</div>` : "";
+  const item = (n, past) => { const v = newsVerdict(n); return `<div class="newsitem ${past ? "past" : ""}"><span class="cur ${n.imp >= 3 ? "hi" : ""}">${esc(n.fam || n.cur)}</span>
+      <div style="min-width:0"><div style="font-weight:700">${esc(n.name)} ${v ? `<span class="label ${v}">${LABEL_TEXT[v]}</span>` : ""}</div><div class="note num">${esc(tzDay(n.t, tz))} · ${esc(tzTime(n.t, tz))} ${tzLbl(tz)} · ${n.t > now ? "in " + left((n.t - now) * 1000) : ago(n.t * 1000)}</div>
+      ${fig(n)}${v && n.t > now - 3 * 3600 ? `<div class="note" style="color:var(--fg)">${esc(VERDICT_TXT[v])}</div>` : ""}</div></div>`; };
   el.innerHTML = `<div class="card" style="display:grid;gap:4px">
     <div class="row" style="justify-content:space-between"><div><div class="eyebrow">From your engine · next 24h</div><h3 style="margin-top:4px">News that pauses trading</h3></div>
       <span class="badge ${acc.newsFilter === false ? "" : "cool"}">Filter ${acc.newsFilter === false ? "off" : "on"}</span></div>
     ${acc.newsPause ? `<div class="pause" style="margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg><div class="note" style="color:var(--fg)">${esc(acc.newsPause)}</div></div>` : ""}
-    ${list.length ? list.map(n => { const aff = affected(n.cur, acc.scan); return `<div class="newsitem ${n.t < now ? "past" : ""}"><span class="cur ${n.imp >= 3 ? "hi" : ""}">${esc(n.cur)}</span>
-      <div style="min-width:0"><div style="font-weight:700">${esc(n.name)}</div><div class="note num">${esc(tzDay(n.t, tz))} · ${esc(tzTime(n.t, tz))} ${tzLbl(tz)} · ${n.t > now ? "in " + left((n.t - now) * 1000) : "passed"}</div>
-      ${aff.length ? `<div class="note">Pauses: ${aff.slice(0, 6).map(esc).join(", ")}${aff.length > 6 ? " +" + (aff.length - 6) : ""}</div>` : ""}</div></div>`; }).join("")
-      : `<p class="muted" style="padding:8px 0">${acc.pnl ? "No high-impact news in the next 24 hours." : "Update the EA to " + EA + " to see its news list."}</p>`}
-    <p class="note">Synthetic indices (Volatility, Step, Crash, Boom) are never paused. You get an alert ${NOTIF.prefs.lead} minutes before each item.</p>
+    ${list.length ? list.map(n => item(n, n.t < now - 1800)).join("") : `<p class="muted" style="padding:8px 0">${acc.pnl ? "No NFP, CPI, PPI or FOMC in the next 24 hours." : "Update the EA to " + EA + " to see its news list."}</p>`}
+    ${list.length && aff.length ? `<div class="note">Pauses: ${aff.slice(0, 8).map(esc).join(", ")}${aff.length > 8 ? " +" + (aff.length - 8) : ""}</div>` : ""}
+    ${outs.length ? `<div class="eyebrow" style="margin-top:12px">Latest results</div>${outs.slice(0, 6).map(n => item(n, false)).join("")}` : ""}
+    <p class="note">Only US NFP, CPI, PPI and FOMC pause trading, and only on USD symbols (EURUSD, XAUUSD, USDJPY…) from ${30} minutes before to ${30} after. Other news and synthetic indices are never paused. Alerts come ${NOTIF.prefs.lead} minutes before, and again the moment the figure is out.</p>
   </div>`;
 }
 
@@ -1276,8 +1542,16 @@ function renderWorld() {
 }
 
 /* ---------- Settings ---------- */
+function liveTxt() {
+  if (!isNative()) return "Live mode works in the Android app.";
+  if (NOTIF.liveErr) return "Live mode could not start: " + esc(NOTIF.liveErr);
+  const st = NOTIF.liveSt;
+  if (!st) return "Starting…";
+  if (st.err) return `<span style="color:var(--ember-2)">Live mode is running but the last check failed (${esc(st.err)}). It retries by itself.</span>`;
+  return st.last ? `<span class="pos">● Live</span> · last check ${esc(ago(st.last))}` : `<span class="pos">● Live</span> · first check in a moment`;
+}
 function renderSettings() {
-  const ids = Object.keys(A.accounts || {}), nat_ = isNative(), p = NOTIF.prefs;
+  const ids = Object.keys(A.accounts || {}), nat_ = isNative(), p = NOTIF.prefs, lst = NOTIF.liveSt;
   const permTxt = !nat_ ? "Alerts appear in the Android app only." : NOTIF.perm === "granted" ? "Allowed" : NOTIF.perm === "denied" ? "Blocked. Open Android Settings → Apps → DarkEngine → Notifications to allow them." : "Not allowed yet";
   $("sec-settings").innerHTML = `
     <div class="card full" style="display:grid;gap:6px">
@@ -1285,11 +1559,16 @@ function renderSettings() {
         <span class="badge ${NOTIF.perm === "granted" ? "pos" : nat_ ? "neg" : ""}">${NOTIF.perm === "granted" ? "On" : nat_ ? "Off" : "App only"}</span></div>
       <p class="note">${esc(permTxt)}</p>
       ${nat_ && NOTIF.perm !== "granted" && NOTIF.perm !== "denied" ? `<button class="btn" id="btn-perm" style="justify-self:start;margin-top:6px">Allow notifications</button>` : ""}
+      <label class="switch"><span><b>Instant alerts (live mode)</b><div class="note">Keeps DarkEngine running in the background with one quiet notification and checks your engine every few seconds, even with the app closed.</div></span><input type="checkbox" data-pref="live" ${p.live ? "checked" : ""}></label>
+      ${p.live ? `<div class="switch"><span><b>Check every</b><div class="note">Faster uses a little more battery and data.</div></span><div class="seg" role="group" aria-label="Check every">${[5, 10, 30].map(m => `<button data-every="${m}" aria-pressed="${p.every === m}">${m}s</button>`).join("")}</div></div>
+      <div class="note" style="padding:8px 0">${liveTxt()}</div>
+      ${nat_ && lst && lst.battery === false ? `<button class="btn" id="btn-battery" style="justify-self:start">Let DarkEngine run in the background</button><p class="note">Android may pause live mode to save battery. Tap the button and choose <b>Allow</b> (or set Battery to <b>Unrestricted</b>).</p>` : ""}` : ""}
       <label class="switch"><span><b>New trades</b><div class="note">When ${EA} opens a trade on any linked account.</div></span><input type="checkbox" data-pref="trades" ${p.trades ? "checked" : ""}></label>
-      <label class="switch"><span><b>Upcoming news</b><div class="note">High-impact news the EA pauses for.</div></span><input type="checkbox" data-pref="news" ${p.news ? "checked" : ""}></label>
+      <label class="switch"><span><b>Upcoming news</b><div class="note">US NFP, CPI, PPI and FOMC: the only news the EA pauses for.</div></span><input type="checkbox" data-pref="news" ${p.news ? "checked" : ""}></label>
+      <label class="switch"><span><b>News results</b><div class="note">The moment the figure is out: actual vs forecast and what it means for the dollar and gold.</div></span><input type="checkbox" data-pref="results" ${p.results ? "checked" : ""}></label>
       <div class="switch"><span><b>News warning</b><div class="note">How long before the release.</div></span><div class="seg" role="group" aria-label="Minutes before news">${[5, 15, 30].map(m => `<button data-lead="${m}" aria-pressed="${p.lead === m}">${m} min</button>`).join("")}</div></div>
       <div class="row" style="margin-top:8px"><button class="btn ghost" id="btn-test">Send a test alert</button></div>
-      <p class="note" style="margin-top:8px">With the app open, alerts arrive within seconds. With the app closed, Android checks every 15 minutes, so a trade alert can come up to 15 minutes late. For the most reliable checks, set Battery for DarkEngine to <b>Unrestricted</b> in Android settings.${nat_ && NOTIF.exact === "denied" ? " Exact news timing is off: allow <b>Alarms &amp; reminders</b> for DarkEngine." : ""}</p>
+      <p class="note" style="margin-top:8px">${p.live ? "Live mode on: alerts arrive within seconds of the EA sending them, app open or closed. The EA sends new trades and news results at once." : "Live mode off: with the app closed, Android checks every 15 minutes, so an alert can come up to 15 minutes late."}${nat_ && NOTIF.exact === "denied" ? " Exact news timing is off: allow <b>Alarms &amp; reminders</b> for DarkEngine." : ""}</p>
     </div>
     <div class="card" style="display:grid;gap:10px"><h3>Linked MT5 accounts</h3>
       ${ids.length ? ids.map(id => { const a = A.accounts[id]; return `<div class="engine"><span class="ic mono" style="font-weight:700;color:var(--ember)">${esc(String(a.broker || "M").slice(0, 1))}</span><div style="min-width:0;flex:1"><div class="num" style="font-weight:700">${esc(id)}</div><div class="note" style="overflow-wrap:anywhere">${esc(a.server || "")} · ${a.pnl ? "" : "old EA · "}synced ${esc(ago((a.updated || 0) * 1000))}</div></div><div class="num" style="text-align:right;font-weight:700">${money(a.balance || 0)}<div class="note">${esc(a.currency || "")}</div></div></div>`; }).join("") : `<p class="muted">None yet.</p>`}
@@ -1354,7 +1633,7 @@ document.addEventListener("submit", e => { if (e.target.id === "passform") { e.p
 document.addEventListener("click", e => { if (e.target.id === "scrim") closeMenu(); });
 function etClick(b) {
   if (b.id === "btn-menu") { A.menu = A.menu ? null : "open"; A.merr = ""; renderMenu(); return true; }
-  if (b.id === "btn-bell" || b.id === "mi-settings") { closeMenu(); go("settings"); return true; }
+  if (b.id === "btn-bell" || b.id === "mi-settings") { closeMenu(); go("settings"); liveStatus(); return true; }
   if (b.id === "mi-pass") { A.menu = A.menu === "pass" ? "open" : "pass"; A.merr = ""; renderMenu(); if (A.menu === "pass") $("np1").focus(); return true; }
   if (b.id === "mi-refresh") { closeMenu(); A.sig = ""; loadAccounts(); refresh(true); loadWorld(true); toast("Refreshing"); return true; }
   if (b.id === "mi-pdf") { closeMenu(); go("trades"); makePdf(); return true; }
@@ -1365,6 +1644,8 @@ function etClick(b) {
   if (b.dataset.range) { A.range = +b.dataset.range; store.set("range", A.range); render(); return true; }
   if (b.dataset.tview) { A.tview = b.dataset.tview; store.set("tview", A.tview); render(); return true; }
   if (b.dataset.lead) { setPref("lead", +b.dataset.lead); return true; }
+  if (b.dataset.every) { setPref("every", +b.dataset.every); return true; }
+  if (b.id === "btn-battery") { nat("DarkWatch", "askBattery").catch(() => {}); return true; }
   if (b.dataset.cat) { A.world.cat = b.dataset.cat; render(); return true; }
   if (b.id === "btn-signout") { signOut(); return true; }
   if (b.id === "btn-reload") { A.accounts = A.sample ? A.accounts : null; A.loadErr = ""; render(); loadAccounts(); return true; }
@@ -1457,7 +1738,7 @@ refresh(false);
 setInterval(() => { if (!document.hidden && A.user && S.sec === "news") { renderClock(); renderEaNews(); if (S.tab !== "series" && !(document.activeElement && document.activeElement.matches("input,select"))) renderNews(); } }, 30000);
 setInterval(() => { if (!document.hidden) refreshSpot().then(() => { if (A.user && S.sec === "news") renderClock(); }).catch(() => {}); }, 120000);
 let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (A.user && (S.sec === "engine" || (S.sec === "news" && S.tab === "series"))) render(); }, 200); });
-document.addEventListener("visibilitychange", () => { if (!document.hidden) { refresh(false); if (A.user && !A.sample) loadAccounts(); } });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { refresh(false); if (A.user && !A.sample) { loadAccounts(); if (NOTIF.prefs.live) liveSync().then(liveStatus); } } });
 </script>
 </body>
 </html>
