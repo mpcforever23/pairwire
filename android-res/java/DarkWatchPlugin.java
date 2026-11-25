@@ -72,6 +72,33 @@ public class DarkWatchPlugin extends Plugin {
         call.resolve(status(c));
     }
 
+    // opens Android's settings for the live-mode notification only, so it can be switched off
+    @PluginMethod
+    public void hideNote(PluginCall call) {
+        Context c = getContext();
+        DarkWatchService.channels(c);
+        try {
+            Intent i;
+            if (Build.VERSION.SDK_INT >= 26) {
+                i = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS);
+                i.putExtra(Settings.EXTRA_APP_PACKAGE, c.getPackageName());
+                i.putExtra(Settings.EXTRA_CHANNEL_ID, DarkWatchService.CH_LIVE);
+            } else {
+                i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + c.getPackageName()));
+            }
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            c.startActivity(i);
+        } catch (Exception ex) { }
+        call.resolve(status(c));
+    }
+
+    static boolean noteHidden(Context c) {
+        if (Build.VERSION.SDK_INT < 26) return false;
+        android.app.NotificationManager nm = (android.app.NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+        android.app.NotificationChannel ch = nm == null ? null : nm.getNotificationChannel(DarkWatchService.CH_LIVE);
+        return ch != null && ch.getImportance() == android.app.NotificationManager.IMPORTANCE_NONE;
+    }
+
     static boolean ignoring(Context c) {
         if (Build.VERSION.SDK_INT < 23) return true;
         PowerManager pm = (PowerManager) c.getSystemService(Context.POWER_SERVICE);
@@ -86,6 +113,8 @@ public class DarkWatchPlugin extends Plugin {
         o.put("battery", ignoring(c));
         o.put("last", sp.getLong("last", 0));
         o.put("err", sp.getString("err", ""));
+        o.put("state", sp.getString("state", ""));
+        o.put("hidden", noteHidden(c));
         return o;
     }
 }

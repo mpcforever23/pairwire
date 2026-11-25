@@ -64,7 +64,7 @@ public class DarkWatchService extends Service {
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
         SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
-        startFg("Starting live alerts…");
+        startFg("Swipe this away or hide it in DarkEngine › Settings. Alerts keep coming.");
         if (!sp.getBoolean("on", false)) { stopForegroundCompat(); stopSelf(); return START_NOT_STICKY; }
         running = true;
         int every = 10;
@@ -90,9 +90,12 @@ public class DarkWatchService extends Service {
     static void channels(Context c) {
         if (Build.VERSION.SDK_INT < 26) return;
         NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationChannel live = new NotificationChannel(CH_LIVE, "DarkEngine live mode", NotificationManager.IMPORTANCE_MIN);
-        live.setDescription("Keeps instant alerts running. You can hide this one.");
+        NotificationChannel live = new NotificationChannel(CH_LIVE, "DarkEngine live mode (safe to turn off)", NotificationManager.IMPORTANCE_MIN);
+        live.setDescription("Only says that instant alerts are running. Turn it off: trade and news alerts still come.");
         live.setShowBadge(false);
+        live.setSound(null, null);
+        live.enableVibration(false);
+        live.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
         nm.createNotificationChannel(live);
         if (nm.getNotificationChannel(CH_ALERT) == null) {
             NotificationChannel a = new NotificationChannel(CH_ALERT, "DarkEngine alerts", NotificationManager.IMPORTANCE_HIGH);
@@ -117,16 +120,21 @@ public class DarkWatchService extends Service {
         return PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
+    // Android requires this notification while the service runs. It is silent, has no status-bar icon,
+    // is never updated (so a swipe or a hidden channel keeps it gone) and can be turned off in Settings.
     private Notification fgNote(String text) {
         return new NotificationCompat.Builder(this, CH_LIVE)
                 .setSmallIcon(icon())
                 .setColor(0xFFFF6A1A)
-                .setContentTitle("DarkEngine live alerts on")
+                .setContentTitle("DarkEngine instant alerts are on")
                 .setContentText(text)
-                .setOngoing(true)
+                .setOngoing(false)
+                .setSilent(true)
                 .setOnlyAlertOnce(true)
                 .setShowWhen(false)
                 .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setVisibility(NotificationCompat.VISIBILITY_SECRET)
+                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFERRED)
                 .setContentIntent(openApp())
                 .build();
     }
@@ -138,11 +146,10 @@ public class DarkWatchService extends Service {
         else startForeground(FG_ID, n);
     }
 
+    // status goes to the app's Settings screen only: the notification is never re-posted
     private void setFg(String text) {
-        if (text.equals(fgText)) return;
         fgText = text;
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(FG_ID, fgNote(text));
+        getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString("state", text).apply();
     }
 
     private void alert(int id, String title, String body) {

@@ -1548,7 +1548,7 @@ function liveTxt() {
   const st = NOTIF.liveSt;
   if (!st) return "Starting…";
   if (st.err) return `<span style="color:var(--ember-2)">Live mode is running but the last check failed (${esc(st.err)}). It retries by itself.</span>`;
-  return st.last ? `<span class="pos">● Live</span> · last check ${esc(ago(st.last))}` : `<span class="pos">● Live</span> · first check in a moment`;
+  return st.last ? `<span class="pos">● Live</span> · last check ${esc(ago(st.last))}${st.state ? " · " + esc(st.state.replace(/ · checked .*$/, "")) : ""}` : `<span class="pos">● Live</span> · first check in a moment`;
 }
 function renderSettings() {
   const ids = Object.keys(A.accounts || {}), nat_ = isNative(), p = NOTIF.prefs, lst = NOTIF.liveSt;
@@ -1562,7 +1562,9 @@ function renderSettings() {
       <label class="switch"><span><b>Instant alerts (live mode)</b><div class="note">Keeps DarkEngine running in the background with one quiet notification and checks your engine every few seconds, even with the app closed.</div></span><input type="checkbox" data-pref="live" ${p.live ? "checked" : ""}></label>
       ${p.live ? `<div class="switch"><span><b>Check every</b><div class="note">Faster uses a little more battery and data.</div></span><div class="seg" role="group" aria-label="Check every">${[5, 10, 30].map(m => `<button data-every="${m}" aria-pressed="${p.every === m}">${m}s</button>`).join("")}</div></div>
       <div class="note" style="padding:8px 0">${liveTxt()}</div>
-      ${nat_ && lst && lst.battery === false ? `<button class="btn" id="btn-battery" style="justify-self:start">Let DarkEngine run in the background</button><p class="note">Android may pause live mode to save battery. Tap the button and choose <b>Allow</b> (or set Battery to <b>Unrestricted</b>).</p>` : ""}` : ""}
+      ${nat_ && lst && lst.battery === false ? `<button class="btn" id="btn-battery" style="justify-self:start">Let DarkEngine run in the background</button><p class="note">Android may pause live mode to save battery. Tap the button and choose <b>Allow</b> (or set Battery to <b>Unrestricted</b>).</p>` : ""}
+      ${nat_ ? (lst && lst.hidden ? `<p class="note"><span class="pos">✓</span> The "instant alerts are on" notification is hidden. Live mode keeps running.</p>`
+        : `<button class="btn ghost" id="btn-hidenote" style="justify-self:start">Hide the "instant alerts are on" notification</button><p class="note">Android only lets an app run in the background if it shows a notification. Tap the button and switch <b>DarkEngine live mode</b> off: the notification disappears, live mode keeps running and trade and news alerts still come. You can also just swipe it away.</p>`) : ""}` : ""}
       <label class="switch"><span><b>New trades</b><div class="note">When ${EA} opens a trade on any linked account.</div></span><input type="checkbox" data-pref="trades" ${p.trades ? "checked" : ""}></label>
       <label class="switch"><span><b>Upcoming news</b><div class="note">US NFP, CPI, PPI and FOMC: the only news the EA pauses for.</div></span><input type="checkbox" data-pref="news" ${p.news ? "checked" : ""}></label>
       <label class="switch"><span><b>News results</b><div class="note">The moment the figure is out: actual vs forecast and what it means for the dollar and gold.</div></span><input type="checkbox" data-pref="results" ${p.results ? "checked" : ""}></label>
@@ -1646,6 +1648,7 @@ function etClick(b) {
   if (b.dataset.lead) { setPref("lead", +b.dataset.lead); return true; }
   if (b.dataset.every) { setPref("every", +b.dataset.every); return true; }
   if (b.id === "btn-battery") { nat("DarkWatch", "askBattery").catch(() => {}); return true; }
+  if (b.id === "btn-hidenote") { nat("DarkWatch", "hideNote").catch(() => {}); return true; }
   if (b.dataset.cat) { A.world.cat = b.dataset.cat; render(); return true; }
   if (b.id === "btn-signout") { signOut(); return true; }
   if (b.id === "btn-reload") { A.accounts = A.sample ? A.accounts : null; A.loadErr = ""; render(); loadAccounts(); return true; }
