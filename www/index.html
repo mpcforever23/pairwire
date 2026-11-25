@@ -749,11 +749,12 @@ function renderNews() {
 /* =====================================================================
    DarkEngine: accounts, period results, trades, notifications, PDF, world news
    ===================================================================== */
-// Firebase project of the app. The DarkEngine V2.0 EA writes to the same database.
+// Firebase project of the app. The DarkVision V3.0 EA writes to the same database.
 const FB = { apiKey: "AIzaSyBUsA_mZf0_wMqrL0sOzPrc5mhH4EksD90", project: "eagletracker-ca2ff", db: "https://firestore.googleapis.com" };
 const FB_READY = /^AIza/.test(FB.apiKey) && /^https:\/\//.test(FB.db);
-const EA = "DarkEngine V2.0";
-const APP_VER = "4.0";
+const EA = "DarkVision V3.0";
+const EA_SHORT = "DarkVision";
+const APP_VER = "4.1";
 const MARK = document.querySelector(".mark") ? document.querySelector(".mark").innerHTML : "";
 const $ = id => document.getElementById(id);
 const A = {
@@ -832,7 +833,7 @@ function renderAuth() {
     <div class="hero-mark" aria-hidden="true">${MARK}</div>
     <div><div class="word" style="font-size:15px;margin-bottom:10px">DARK<b>ENGINE</b></div>
       <h1>${up ? "Start your engine" : reset ? "Reset your password" : "Welcome back"}</h1>
-      <p class="muted" style="margin-top:8px">${up ? "Watch DarkEngine V2.0 trade your MT5 accounts: day, week and month results, every trade, and alerts on your phone." : reset ? "We will email you a link to choose a new password." : "Sign in to see what your engine is doing."}</p></div>
+      <p class="muted" style="margin-top:8px">${up ? "Watch DarkVision V3.0 trade your MT5 accounts: day, week and month results, every trade, and alerts on your phone." : reset ? "We will email you a link to choose a new password." : "Sign in to see what your engine is doing."}</p></div>
     <form id="authform" novalidate>
       <label for="au-email">Email<input class="input" id="au-email" type="email" autocomplete="email" inputmode="email" value="${esc(A.form.email)}" placeholder="you@example.com"></label>
       ${reset ? "" : `<label for="au-pass">Password<input class="input" id="au-pass" type="password" autocomplete="${up ? "new-password" : "current-password"}" value="${esc(A.form.pass)}" placeholder="At least 6 characters"></label>`}
@@ -858,7 +859,7 @@ function runner(event, details) { if (!isNative()) return Promise.resolve(null);
 function saveSeen() { const a = [...NOTIF.seen]; store.set("seen", a.slice(-600)); }
 async function initNotif(ask) {
   if (!isNative()) { NOTIF.perm = "web"; return; }
-  try { await nat("LocalNotifications", "createChannel", { id: "de_alerts", name: "DarkEngine alerts", description: "New trades opened by DarkEngine and upcoming news", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#FF6A1A" }); } catch (e) {}
+  try { await nat("LocalNotifications", "createChannel", { id: "de_alerts", name: "DarkEngine alerts", description: "New trades opened by DarkVision and upcoming news", importance: 5, visibility: 1, vibration: true, lights: true, lightColor: "#FF6A1A" }); } catch (e) {}
   try { NOTIF.perm = (await nat("LocalNotifications", "checkPermissions")).display; } catch (e) { NOTIF.perm = "unavailable"; }
   if (ask && /prompt/.test(NOTIF.perm) && !store.get("asked", false)) { store.set("asked", true); await askPermission(); }
   try { NOTIF.exact = (await nat("LocalNotifications", "checkExactNotificationSetting")).exact_alarm; } catch (e) {}
@@ -883,7 +884,7 @@ async function postNow(list) {
 }
 function tradeText(p, acc) {
   const dg = String(p.open).split(".")[1], d = dg ? dg.length : 2, f = v => v ? (+v).toFixed(d) : "none";
-  return { title: `DarkEngine ${p.side === "buy" ? "BUY" : "SELL"} ${p.sym}`, body: `${(+p.vol).toFixed(2)} lots at ${f(p.open)} · SL ${f(p.sl)} · TP ${f(p.tp)}`, largeBody: `${(+p.vol).toFixed(2)} lots at ${f(p.open)}\nStop loss ${f(p.sl)} · Take profit ${f(p.tp)}\n${p.strat ? "Signal: " + p.strat + "\n" : ""}Account ${acc.login}` };
+  return { title: `${EA_SHORT} ${p.side === "buy" ? "BUY" : "SELL"} ${p.sym}`, body: `${(+p.vol).toFixed(2)} lots at ${f(p.open)} · SL ${f(p.sl)} · TP ${f(p.tp)}`, largeBody: `${(+p.vol).toFixed(2)} lots at ${f(p.open)}\nStop loss ${f(p.sl)} · Take profit ${f(p.tp)}\n${p.strat ? "Signal: " + p.strat + "\n" : ""}Account ${acc.login}` };
 }
 async function processAlerts(accs) {
   if (A.sample) return;
@@ -925,7 +926,7 @@ async function testAlert() {
   if (!isNative()) { toast("Test alerts work in the Android app."); return; }
   if (NOTIF.perm !== "granted") await askPermission();
   if (NOTIF.perm !== "granted") { toast("Alerts are blocked. Allow them in Android settings."); return; }
-  await postNow([{ id: 7, title: "DarkEngine BUY XAUUSD", body: "Test alert: this is how a new trade shows on your phone." }]);
+  await postNow([{ id: 7, title: EA_SHORT + " BUY XAUUSD", body: "Test alert: this is how a new trade shows on your phone." }]);
   toast("Test alert sent");
 }
 
@@ -948,7 +949,7 @@ async function loadAccounts() {
 function sampleAccounts() {
   let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const tz = 3, ch = 23, now = Date.now(), nowS = Math.floor(now / 1000), days = {}, deals = [];
-  const syms = ["XAUUSD", "EURUSD", "Volatility 75 Index", "GBPUSD", "Step Index", "BTCUSD"], strats = ["Spring H1", "SOS M15", "UTAD H4", "LPS H1", "SOW M30"], hows = ["tp", "tp", "sl", "tp", "sl", "ea", "manual"];
+  const syms = ["XAUUSD", "EURUSD", "Volatility 75 Index", "GBPUSD", "Step Index", "BTCUSD"], strats = ["DV3 TP1", "DV3 TP2", "DV3 TP3", "DV3 TP1", "DV3 TP2"], hows = ["tp", "tp", "sl", "tp", "sl", "ea", "manual"];
   let bal = 5000, eaN = 0, eaW = 0, eaPL = 0;
   for (let i = 40; i >= 0; i--) {
     const key = bizKey(now - i * 86400000, tz, ch), wd = keyDate(key).getUTCDay();
@@ -978,7 +979,7 @@ function sampleAccounts() {
     balance: +bal.toFixed(2), equity: +(bal + 61.2).toFixed(2), margin: 121.5, floating: 61.2, updated: nowS - 25, today,
     charts: [{ name: EA, sym: "XAUUSD", tf: "H1" }], scan: syms, window: 100, newsFilter: true, newsPause: "",
     eas: [{ magic: 20261013, name: EA, pl: +eaPL.toFixed(2), n: eaN, w: eaW }], pnl, days,
-    positions: [{ id: 880001, t: nowS - 3400, sym: "XAUUSD", side: "buy", vol: 0.1, open: 4008.35, sl: 3991.2, tp: 4042.8, pl: 48.9, strat: "Spring H1", ea: EA }, { id: 880002, t: nowS - 900, sym: "Volatility 75 Index", side: "sell", vol: 0.005, open: 38712.44, sl: 39120.1, tp: 37901.6, pl: 12.3, strat: "UTAD H4", ea: EA }],
+    positions: [{ id: 880001, t: nowS - 3400, sym: "XAUUSD", side: "buy", vol: 0.1, open: 4008.35, sl: 3991.2, tp: 4042.8, pl: 48.9, strat: "DV3 TP1", ea: EA }, { id: 880002, t: nowS - 900, sym: "Volatility 75 Index", side: "sell", vol: 0.005, open: 38712.44, sl: 39120.1, tp: 37901.6, pl: 12.3, strat: "DV3 TP2", ea: EA }],
     deals: deals.slice(-60).reverse(), news } };
 }
 function currentAcct() {
@@ -1025,7 +1026,7 @@ function renderSync(acc) {
 }
 function linkSteps() {
   return `<ol class="steps">
-    <li><div><b>Attach ${EA}</b> to one chart in MT5 on your PC or VPS. It scans and trades the other symbols by itself.</div></li>
+    <li><div><b>Attach ${EA}</b> to each chart you want it to trade in MT5 on your PC or VPS (gold, BTC, any pair). One chart sends the results for all of them.</div></li>
     <li><div>In the EA inputs, open <b>DarkEngine app</b> and type the same <b>email and password</b> you use here.</div></li>
     <li><div>In MT5 go to <b>Tools → Options → Expert Advisors</b>, tick <b>Allow WebRequest</b> and add:<br><span class="mono" style="font-size:12.5px;overflow-wrap:anywhere">https://identitytoolkit.googleapis.com</span><br><span class="mono" style="font-size:12.5px;overflow-wrap:anywhere">${esc(FB.db)}</span></div></li>
     <li><div>Within a minute the EA dashboard shows <b>App: linked</b> and your account appears here. Results count from that moment on.</div></li>

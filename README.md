@@ -1,11 +1,11 @@
 # DarkEngine for Android
 
-The phone app for the **DarkEngine V2.0** MT5 robot: day, week and month results (closed at 23:00 East Africa Time), every trade the robot opens, news that pauses trading, world news, PDF reports, and alerts at the top of the phone.
+The phone app for the **DarkVision V3.0** MT5 robot: day, week and month results (closed at 23:00 East Africa Time), every trade the robot opens, news that pauses trading, world news, PDF reports, and alerts at the top of the phone.
 
 Every push to `main` builds a new APK. Open the **Actions** tab, click the latest green run, and download **DarkEngine-APK** from the Artifacts section.
 
 ## How it gets data
-The DarkEngine V2.0 EA sends each account's results to the app's Firebase database. Firebase settings live in `www/index.html` (`const FB = {...}`) and in the EA inputs.
+The DarkVision V3.0 EA sends each account's results to the app's Firebase database. Firebase settings live in `www/index.html` (`const FB = {...}`) and in the EA inputs.
 
 ## Alerts
 - With the app open, new trades and news alerts arrive within seconds.

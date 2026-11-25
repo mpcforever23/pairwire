@@ -1,8 +1,8 @@
 {
   "name": "darkengine",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "private": true,
-  "description": "DarkEngine: the phone app for the DarkEngine V2.0 MT5 robot. Results, trades, news and alerts.",
+  "description": "DarkEngine: the phone app for the DarkVision V3.0 MT5 robot. Results, trades, news and alerts.",
   "dependencies": {
     "@capacitor/android": "6.1.2",
     "@capacitor/background-runner": "2.0.0",

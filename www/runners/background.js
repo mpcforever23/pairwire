@@ -1,5 +1,5 @@
 // DarkEngine background check. Android runs this about every 15 minutes while the app is closed.
-// It reads the linked accounts from Firestore and posts an alert for each new DarkEngine trade
+// It reads the linked accounts from Firestore and posts an alert for each new DarkVision V3.0 trade
 // and for news that is about to be released. Each event gets a fresh context, so state lives in CapacitorKV.
 
 const RECENT_MS = 6 * 3600 * 1000;
@@ -53,7 +53,7 @@ async function check() {
       seen.add(id);
       if (first || prefs.trades === false || !p.t || now - p.t * 1000 > RECENT_MS) continue;
       const d = digits(p.open), f = v => v ? Number(v).toFixed(d) : "none";
-      out.push({ id, title: "DarkEngine " + (p.side === "buy" ? "BUY" : "SELL") + " " + p.sym,
+      out.push({ id, title: "DarkVision " + (p.side === "buy" ? "BUY" : "SELL") + " " + p.sym,
         body: Number(p.vol).toFixed(2) + " lots at " + f(p.open) + " · SL " + f(p.sl) + " · TP " + f(p.tp),
         channelId: CHANNEL, smallIcon: ICON, autoCancel: true });
     }
